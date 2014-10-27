@@ -18,6 +18,5 @@ Requires Gnu Scientific Library for rng and Cairo library for graphics.
 
 ### Who do I talk to? ###
 
-* Repo owner or admin
-Gonzalo G. Peraza Mues
+* Gonzalo G. Peraza Mues
 ggperaza@gmail.com
