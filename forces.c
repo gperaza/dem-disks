@@ -1,9 +1,12 @@
 #include "common.h"
+extern double *s0;
 
-void bulk_force(disk*, double, double);
-void pair_force(disk*, disk*);
-double normal_force_disk_disk(disk*, disk*, double, double, double, double);
-double tangential_force_disk_disk(double, disk*, disk*, double, double, double);
+void bulk_force(unsigned long, double, double);
+void pair_force(unsigned long, unsigned long);
+double normal_force_disk_disk(unsigned long, unsigned long, double, double,
+                              double, double);
+double tangential_force_disk_disk(double, unsigned long, unsigned long, double,
+                                  double, double);
 
 void make_forces() {
     unsigned long i, j;
@@ -19,12 +22,12 @@ void make_forces() {
     for (i = 0; i < nParticles; i++) {
 
         if (particle[i].type == 0) {
-            bulk_force(&particle[i], cga, sga);
+            bulk_force(i, cga, sga);
         }
 
         for (j = i + 1; j < nParticles; j++) {
             if (particle[i].type == 0 || particle[j].type == 0) {
-                pair_force(&particle[i], &particle[j]);
+                pair_force(i, j);
             }
         }
     }
@@ -32,30 +35,30 @@ void make_forces() {
     return;
 }
 
-void bulk_force(disk* particle, double cga, double sga) {
+void bulk_force(unsigned long i, double cga, double sga) {
     double gravity = global.gravity;
     double bGamma = global.bGamma;
 
-    particle->fx += -particle->mass*gravity*sga;
-    particle->fy += -particle->mass*gravity*cga;
+    particle[i].fx += -particle[i].mass*gravity*sga;
+    particle[i].fy += -particle[i].mass*gravity*cga;
 
-    particle->fx += - bGamma * particle->x1*particle->mass;
-    particle->fy += - bGamma * particle->y1*particle->mass;
+    particle[i].fx += - bGamma * particle[i].x1*particle[i].mass;
+    particle[i].fy += - bGamma * particle[i].y1*particle[i].mass;
 
     return;
 }
 
-void pair_force(disk* p1, disk* p2) {
+void pair_force(unsigned long i, unsigned long j) {
 
     double box_w = global.box_w;
     double box_h = global.box_h;
 
     double rx12, ry12, r12sq, r12;
     double normalForce = 0, tangentialForce = 0;
-    double radsum = p1->radius + p2->radius;
+    double radsum = particle[i].radius + particle[j].radius;
 
-    rx12 = p1->x0 - p2->x0;
-    ry12 = p1->y0 - p2->y0;
+    rx12 = particle[i].x0 - particle[j].x0;
+    ry12 = particle[i].y0 - particle[j].y0;
 
     // Periodic boundary conditions on the RELATIVE VECTOR
     rx12  = rx12 - box_w*round( rx12/box_w );
@@ -69,29 +72,31 @@ void pair_force(disk* p1, disk* p2) {
         double rx12n = rx12/r12;
         double ry12n = ry12/r12;
 
-        normalForce = normal_force_disk_disk(p1, p2, r12, rx12n, ry12n, radsum);
-        tangentialForce = tangential_force_disk_disk(normalForce, p1, p2,
+        normalForce = normal_force_disk_disk(i, j, r12, rx12n, ry12n, radsum);
+        tangentialForce = tangential_force_disk_disk(normalForce, i, j,
                                                      rx12, ry12, radsum);
 
         /*Add normal forces.*/
-        p1->fx += rx12n*normalForce;
-        p1->fy += ry12n*normalForce;
-        p2->fx -= rx12n*normalForce;
-        p2->fy -= ry12n*normalForce;
+        particle[i].fx += rx12n*normalForce;
+        particle[i].fy += ry12n*normalForce;
+        particle[j].fx -= rx12n*normalForce;
+        particle[j].fy -= ry12n*normalForce;
         /*Add tangential forces*/
-        p1->fx += -ry12n*tangentialForce;
-        p1->fy += rx12n*tangentialForce;
-        p2->fx -= -ry12n*tangentialForce;
-        p2->fy -= rx12n*tangentialForce;
+        particle[i].fx += -ry12n*tangentialForce;
+        particle[i].fy += rx12n*tangentialForce;
+        particle[j].fx -= -ry12n*tangentialForce;
+        particle[j].fy -= rx12n*tangentialForce;
         /*Add torques*/
-        p1->fw -= tangentialForce*r12*p1->radius/(radsum);
-        p2->fw -= tangentialForce*r12*p2->radius/(radsum);
+        particle[i].fw -= tangentialForce*r12*particle[i].radius/(radsum);
+        particle[j].fw -= tangentialForce*r12*particle[j].radius/(radsum);
+    } else {
+        s0[i*global.nParticles + (j-1) - i*(i+3)/2] = NAN;
     }
 
     return;
 }
 
-double normal_force_disk_disk(disk* p1, disk* p2, double r12,
+double normal_force_disk_disk(unsigned long i, unsigned long j, double r12,
                               double rx12n, double ry12n, double radsum) {
     double kn = diskParameters.kn;
     double vGamma = diskParameters.vGamma;
@@ -99,10 +104,11 @@ double normal_force_disk_disk(disk* p1, disk* p2, double r12,
     double normalForce = 0;
 
     /*Relative velocities*/
-    double vx12 = p1->x1 - p2->x1;
-    double vy12 = p1->y1 - p2->y1;
+    double vx12 = particle[i].x1 - particle[j].x1;
+    double vy12 = particle[i].y1 - particle[j].y1;
 
-    double effMass = p1->mass*p2->mass/(p1->mass + p2->mass);
+    double effMass = particle[i].mass*particle[j].mass/(particle[i].mass
+                                                        + particle[j].mass);
 
     normalForce = kn*(radsum - r12);
     normalForce -= vGamma*sqrt(effMass)*(rx12n*vx12 + ry12n*vy12);
@@ -111,25 +117,28 @@ double normal_force_disk_disk(disk* p1, disk* p2, double r12,
     return normalForce;
 }
 
-double tangential_force_disk_disk(double normalForce, disk* p1, disk* p2,
-                                  double rx12, double ry12, double radsum){
+double tangential_force_disk_disk(double normalForce, unsigned long i,
+                                  unsigned long j, double rx12, double ry12,
+                                  double radsum){
     double kt = diskParameters.kt;
     double mu = diskParameters.mu;
+    unsigned long l = i*global.nParticles + (j-1) - i*(i+3)/2;
 
-    double tangentialForce = 0;
+    double tangentialForce;
     double coulombLimit = mu*normalForce;
-    double ss, d_ss, s0 = 0;
+    double ss, d_ss;
 
     /*Calculate tangential displacement.*/
-    ss = p1->w0*p1->radius + p2->w0*p2->radius - atan2(ry12, rx12)*radsum;
+    ss = particle[i].w0*particle[i].radius + particle[j].w0*particle[j].radius
+        - atan2(ry12, rx12)*radsum;
 
     /*Check if they where touching before.*/
-    if (1) {
-        d_ss = ss - s0;
+    if (!(s0[l] != s0[l])) {  //true only when s0 is NaN
+        d_ss = ss - s0[l];
         d_ss = d_ss -
             2*M_PI*radsum*copysign((fabs(d_ss) > M_PI*radsum), d_ss);
     } else {
-        s0 = ss;
+        s0[l] = ss;
         d_ss = 0;
     }
 
@@ -138,7 +147,7 @@ double tangential_force_disk_disk(double normalForce, disk* p1, disk* p2,
     if (fabs(tangentialForce) >= coulombLimit) {
         tangentialForce = copysign(coulombLimit, d_ss);
         d_ss = copysign(mu*normalForce/kt, d_ss);
-        s0 = ss - d_ss;
+        s0[l] = ss - d_ss;
     }
 
 

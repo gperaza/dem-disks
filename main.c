@@ -10,6 +10,7 @@
 #include <time.h>
 
 disk *particle;
+double *s0;
 particleParameters diskParameters;
 systemParameters global;
 FILE *fPhase, *fFirst, *fLast;
@@ -244,7 +245,14 @@ unsigned long init_system() {
     assert(layerY + (meanR + sigma)  < box_h);
 
     gsl_rng_free(rgen);
-    return (nParticles + nBottom);
+
+    nParticles += nBottom;
+    s0 = (double*)calloc((nParticles*nParticles-nParticles)/2 , sizeof(double));
+    for (i = 0; i < (nParticles*nParticles-nParticles)/2; i++) {
+        s0[i] = NAN;
+    }
+
+    return (nParticles);
 }
 
 void step() {
