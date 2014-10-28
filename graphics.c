@@ -7,16 +7,16 @@
 #define SHRINK (0.70)
 
 void color_background(cairo_t*, int, double, double);
-void draw_particles(cairo_t*, unsigned long, double, double);
+void draw_particles(cairo_t*, long, double, double);
 void draw_links(cairo_t*);
 void draw_box(cairo_t*, double, double);
 void draw_data(cairo_t*, double, double, double);
-void draw_disk(cairo_t*, unsigned long, double, double, double, double, int);
+void draw_disk(cairo_t*, long, double, double, double, double, int);
 
 void graphics(int relaxing) {
     double box_w = global.box_w;
     double box_h = global.box_h;
-    unsigned long nParticles = global.nParticles;
+    long nParticles = global.nParticles;
     double time = global.time;
 
     cairo_surface_t *surface;
@@ -51,9 +51,9 @@ void graphics(int relaxing) {
     return;
 }
 
-void draw_particles(cairo_t *cr, unsigned long nParticles, double box_w,
+void draw_particles(cairo_t *cr, long nParticles, double box_w,
                     double box_h) {
-    unsigned long i;
+    long i;
 
     cairo_set_line_width(cr,fmin(box_w, box_h)/800);
     for (i = 0; i < nParticles; i++) {
@@ -68,7 +68,7 @@ void draw_particles(cairo_t *cr, unsigned long nParticles, double box_w,
     return;
 }
 
-void draw_disk(cairo_t *cr, unsigned long id, double x, double y, double r,
+void draw_disk(cairo_t *cr, long id, double x, double y, double r,
                double angle, int type) {
 
     double maxrot = angle;

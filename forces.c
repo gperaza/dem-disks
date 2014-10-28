@@ -1,16 +1,14 @@
 #include "common.h"
 extern double *s0;
 
-void bulk_force(unsigned long, double, double);
-void pair_force(unsigned long, unsigned long);
-double normal_force_disk_disk(unsigned long, unsigned long, double, double,
+double normal_force_disk_disk(long, long, double, double,
                               double, double);
-double tangential_force_disk_disk(double, unsigned long, unsigned long, double,
+double tangential_force_disk_disk(double, long, long, double,
                                   double, double);
 
 void make_forces() {
-    unsigned long i, j;
-    unsigned long nParticles = global.nParticles;
+    long i, j;
+    long nParticles = global.nParticles;
     double gravityAngle = global.gravityAngle;
     double cga = cos(gravityAngle);
     double sga = sin(gravityAngle);
@@ -26,16 +24,14 @@ void make_forces() {
         }
 
         for (j = i + 1; j < nParticles; j++) {
-            if (particle[i].type == 0 || particle[j].type == 0) {
-                pair_force(i, j);
-            }
+            pair_force(i, j);
         }
     }
 
     return;
 }
 
-void bulk_force(unsigned long i, double cga, double sga) {
+void bulk_force(long i, double cga, double sga) {
     double gravity = global.gravity;
     double bGamma = global.bGamma;
 
@@ -48,7 +44,7 @@ void bulk_force(unsigned long i, double cga, double sga) {
     return;
 }
 
-void pair_force(unsigned long i, unsigned long j) {
+void pair_force(long i, long j) {
 
     double box_w = global.box_w;
     double box_h = global.box_h;
@@ -56,6 +52,8 @@ void pair_force(unsigned long i, unsigned long j) {
     double rx12, ry12, r12sq, r12;
     double normalForce = 0, tangentialForce = 0;
     double radsum = particle[i].radius + particle[j].radius;
+
+    if (particle[i].type != 0 && particle[j].type != 0 ) return;
 
     rx12 = particle[i].x0 - particle[j].x0;
     ry12 = particle[i].y0 - particle[j].y0;
@@ -96,7 +94,7 @@ void pair_force(unsigned long i, unsigned long j) {
     return;
 }
 
-double normal_force_disk_disk(unsigned long i, unsigned long j, double r12,
+double normal_force_disk_disk(long i, long j, double r12,
                               double rx12n, double ry12n, double radsum) {
     double kn = diskParameters.kn;
     double vGamma = diskParameters.vGamma;
@@ -117,12 +115,12 @@ double normal_force_disk_disk(unsigned long i, unsigned long j, double r12,
     return normalForce;
 }
 
-double tangential_force_disk_disk(double normalForce, unsigned long i,
-                                  unsigned long j, double rx12, double ry12,
+double tangential_force_disk_disk(double normalForce, long i,
+                                  long j, double rx12, double ry12,
                                   double radsum){
     double kt = diskParameters.kt;
     double mu = diskParameters.mu;
-    unsigned long l = i*global.nParticles + (j-1) - i*(i+3)/2;
+    long l = i*global.nParticles + (j-1) - i*(i+3)/2;
 
     double tangentialForce;
     double coulombLimit = mu*normalForce;

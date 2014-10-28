@@ -27,13 +27,13 @@ typedef struct particleParameters
 
 typedef struct systemParameters
 {
-    unsigned long  nParticles;
+    long  nParticles;
     double box_w; double box_h;
     double gravity; double gravityAngle;
     double bGamma;
     double freq; double epsilon;
     double dimensionlessAc;
-    unsigned long seed;
+    long seed;
     double time;
     double timestep;
     double relaxTime; double runTime;

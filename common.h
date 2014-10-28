@@ -13,14 +13,18 @@ extern particleParameters diskParameters;
 extern systemParameters global;
 
 void step();
-void integrate();
 void predictor_positions(disk*);
 void predictor_rotations(disk*);
 void corrector_positions(disk*);
 void corrector_rotations(disk*);
-unsigned long init_system();
+long init_system();
 void set_constants(double);
 void make_forces();
 void graphics(int);
 void boundary_conditions(disk*);
+void make_forces_linked_cell();
+void init_cell();
+void bulk_force(long, double, double);
+void pair_force(long, long);
+void free_cell();
 #endif

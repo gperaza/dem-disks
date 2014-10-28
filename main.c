@@ -34,11 +34,11 @@ void get_input() {
         sscanf(input,"%s %s",type, value);
         countInputs++;
         if (strcmp(type,"#nParticles") == 0) {
-            sscanf(value, "%lu", &global.nParticles);
-            printf("Particles = %lu.\n", global.nParticles);
+            sscanf(value, "%ld", &global.nParticles);
+            printf("Particles = %ld.\n", global.nParticles);
         } else if (strcmp(type,"#seed") == 0) {
-            sscanf(value, "%lu", &global.seed);
-            printf("Seed for rng = %lu.\n", global.seed);
+            sscanf(value, "%ld", &global.seed);
+            printf("Seed for rng = %ld.\n", global.seed);
         } else if (strcmp(type,"#box_w") == 0) {
             sscanf(value, "%lf", &global.box_w);
             printf("box_w = %lf disks.\n", global.box_w);
@@ -118,10 +118,10 @@ int main(/*int argc, char *argv[]*/)
     get_input();
 
     double timestep = global.timestep;
-    unsigned long nStepsRelax = (unsigned long)(global.relaxTime/timestep);
-    unsigned long nStepsRun = (unsigned long)(global.runTime/timestep);
-    unsigned long stepsForGraph = (unsigned long)(global.timeForGraph/timestep);
-    unsigned long stepsForWrite = (unsigned long)(global.timeForWrite/timestep);
+    long nStepsRelax = (long)(global.relaxTime/timestep);
+    long nStepsRun = (long)(global.runTime/timestep);
+    long stepsForGraph = (long)(global.timeForGraph/timestep);
+    long stepsForWrite = (long)(global.timeForWrite/timestep);
     global.time = -timestep*nStepsRelax;
 
     /*Set up constants for the gear integrator.*/
@@ -132,13 +132,15 @@ int main(/*int argc, char *argv[]*/)
     fLast = fopen("ending_phase_space.out", "w");
 
     /*Initialize the packing and make nParticles include walls.*/
-    printf("Simulating for %lu particles.\n", global.nParticles);
+    printf("Simulating for %ld particles.\n", global.nParticles);
     global.nParticles = init_system();
-    printf("Number of particles including walls: %lu.\n", global.nParticles);
+    printf("Number of particles including walls: %ld.\n", global.nParticles);
 
-    //init_algorithm();
+    /*Initialize linked cells*/
+    init_cell();
+
     int relaxing = 1;
-    unsigned long i;
+    long i;
     for (i = 0; i < nStepsRelax; i++) {
         if (!(i % stepsForGraph)) {
             graphics(relaxing);
@@ -161,25 +163,30 @@ int main(/*int argc, char *argv[]*/)
 
     //phase_plot(flast);
     free(particle);
+    free_cell();
+    free(s0);
+    fclose(fFirst);
+    fclose(fPhase);
+    fclose(fLast);
     clock_time((int)iTime);
     return 0;
 }
 
-unsigned long init_system() {
-    unsigned long nParticles = global.nParticles;
+long init_system() {
+    long nParticles = global.nParticles;
     double box_w = global.box_w;
     double box_h = global.box_h;
     double meanR = diskParameters.meanR;
     double density = diskParameters.density;
-    unsigned long seed = global.seed;
+    long seed = global.seed;
 
-    unsigned long i, j;
+    long i, j;
     double layerY = 0;
     int layerN = 1;
     double sumWidth = 0;
     double wallR = meanR;
-    unsigned long nBottom = (unsigned long)ceil(box_w/(2*wallR));
-    unsigned long nDisks = nParticles;
+    long nBottom = (long)ceil(box_w/(2*wallR));
+    long nDisks = nParticles;
     double sigma = meanR*0.25;
     disk tempParticle;
     gsl_rng * rgen = gsl_rng_alloc(gsl_rng_mt19937);
@@ -210,9 +217,9 @@ unsigned long init_system() {
     /*Considering 3 different radius around a mean.*/
     for (i = 0; i < nDisks; i++) {
         particle[i].type = 0;
-        if (i < (unsigned long)(nParticles/3))
+        if (i < (long)(nParticles/3))
             particle[i].radius = meanR - sigma;
-        else if (i < (unsigned long)(2*nParticles/3))
+        else if (i < (long)(2*nParticles/3))
             particle[i].radius = meanR;
         else
             particle[i].radius = meanR + sigma;
@@ -257,16 +264,10 @@ unsigned long init_system() {
 
 void step() {
 
+    long i = 0;
+    long nParticles = global.nParticles;
+
     global.time += global.timestep;
-    integrate();
-
-    return;
-}
-
-void integrate() {
-
-    unsigned long i = 0;
-    unsigned long nParticles = global.nParticles;
 
     for (i = 0; i < nParticles; i++) {
         if (particle[i].type == 0) {
@@ -276,6 +277,7 @@ void integrate() {
         if (particle[i].type == 1) boundary_conditions(&particle[i]);
     }
     make_forces();
+    //make_forces_linked_cell();
     for (i = 0; i < nParticles; i++) {
         if (particle[i].type == 0) {
             if (particle[i].posFixed == 0) corrector_positions(&particle[i]);
@@ -288,7 +290,7 @@ void integrate() {
 }
 
 void phase_plot(FILE* fp) {
-    unsigned long i;
+    long i;
 
     for (i = 0; i < global.nParticles; i++) {
         fprintf(fp,"Hello World.\n");
