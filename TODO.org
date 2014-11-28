@@ -1,0 +1,9 @@
+Write results to files: Phase space, link statistics, contact status, forces.
+We need additional data structures to do this.
+
+Change the sinusoidal excitation to be in the direction of gravity. So
+far calculations in the model assume this. Experimentally what we have
+done is also this. Check this is correct. This does not change the
+case of zero tilt, so our results for packings remain correct.
+
+Check the gear predictor corrector coefficients.
