@@ -42,3 +42,10 @@ typedef struct systemParameters
     double a[5];
     double c[6];
 } systemParameters;
+
+typedef struct neighbor_stats
+{
+    unsigned int touching;
+    double s0;
+
+} neighbor_stats;

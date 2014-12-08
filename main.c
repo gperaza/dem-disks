@@ -10,7 +10,7 @@
 #include <time.h>
 
 disk *particle;
-double *s0;
+neighbor_stats *nStats;
 particleParameters diskParameters;
 systemParameters global;
 FILE *fPhase, *fFirst, *fLast;
@@ -164,7 +164,7 @@ int main(/*int argc, char *argv[]*/)
     //phase_plot(flast);
     free(particle);
     free_cell();
-    free(s0);
+    free(nStats);
     fclose(fFirst);
     fclose(fPhase);
     fclose(fLast);
@@ -254,9 +254,10 @@ long init_system() {
     gsl_rng_free(rgen);
 
     nParticles += nBottom;
-    s0 = (double*)calloc((nParticles*nParticles-nParticles)/2 , sizeof(double));
+    nStats = (neighbor_stats*)calloc((nParticles*nParticles-nParticles)/2 ,
+                             sizeof(neighbor_stats));
     for (i = 0; i < (nParticles*nParticles-nParticles)/2; i++) {
-        s0[i] = NAN;
+        nStats[i].touching = 0;
     }
 
     return (nParticles);

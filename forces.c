@@ -1,5 +1,5 @@
 #include "common.h"
-extern double *s0;
+extern neighbor_stats *nStats;
 
 double normal_force_disk_disk(long, long, double, double,
                               double, double);
@@ -88,7 +88,7 @@ void pair_force(long i, long j) {
         particle[i].fw -= tangentialForce*r12*particle[i].radius/(radsum);
         particle[j].fw -= tangentialForce*r12*particle[j].radius/(radsum);
     } else {
-        s0[i*global.nParticles + (j-1) - i*(i+3)/2] = NAN;
+        nStats[i*global.nParticles + (j-1) - i*(i+3)/2].touching = 0;
     }
 
     return;
@@ -131,13 +131,14 @@ double tangential_force_disk_disk(double normalForce, long i,
         - atan2(ry12, rx12)*radsum;
 
     /*Check if they where touching before.*/
-    if (!(s0[l] != s0[l])) {  //true only when s0 is NaN
-        d_ss = ss - s0[l];
+    if (nStats[l].touching == 1) {
+        d_ss = ss - nStats[l].s0;
         d_ss = d_ss -
             2*M_PI*radsum*copysign((fabs(d_ss) > M_PI*radsum), d_ss);
     } else {
-        s0[l] = ss;
+        nStats[l].s0 = ss;
         d_ss = 0;
+        nStats[l].touching = 1;
     }
 
     tangentialForce = kt*d_ss;
@@ -145,7 +146,7 @@ double tangential_force_disk_disk(double normalForce, long i,
     if (fabs(tangentialForce) >= coulombLimit) {
         tangentialForce = copysign(coulombLimit, d_ss);
         d_ss = copysign(mu*normalForce/kt, d_ss);
-        s0[l] = ss - d_ss;
+        nStats[l].s0 = ss - d_ss;
     }
 
 
