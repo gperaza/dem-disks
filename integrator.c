@@ -123,7 +123,8 @@ void set_constants(double timestep) {
     a[3]=a[2]*timestep/4.0;
     a[4]=a[3]*timestep/5.0;
 
-    c[0]=3.0/20.0*a[1];
+    /*C[0] must be changed to 3/16 for forces dependent on velocity.*/
+    c[0]=3.0/20.0*a[1]; //Should we try 3/16?
     c[1]=251.0/360.0*a[1]/a[0];
     c[2]=1.0;
     c[3]=11.0/18.0*a[1]/a[2];
