@@ -160,6 +160,10 @@ int main(/*int argc, char *argv[]*/)
             phase_plot(fPhase);
         }
         step();
+        //Calculate and write data for the 3Disk setup.
+        if (global.nParticles == 3) {
+
+        }
     }
 
     phase_plot(fLast);
