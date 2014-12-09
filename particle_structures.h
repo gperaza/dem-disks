@@ -44,6 +44,8 @@ typedef struct systemParameters
 
     unsigned long linkCount, slidingLinks, changingLinks;
     double meanLinkSat, meanSqLinkSat;
+
+    double potEnergyElasNorm, potEnergyElasTg;
 } systemParameters;
 
 typedef struct neighbor_stats

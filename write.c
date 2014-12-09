@@ -1,6 +1,6 @@
 #include "common.h"
 
-extern FILE *fPhase, *fFirst, *fLast, *fLinkStat, *fLinks;
+extern FILE *fPhase, *fFirst, *fLast, *fLinkStat, *fLinks, *fEnergy;
 extern FILE *fp;
 extern links_3disks links3;
 
@@ -16,7 +16,7 @@ void write_results() {
         global.meanLinkSat = global.meanLinkSat/global.linkCount;
         global.meanSqLinkSat = global.meanSqLinkSat/global.linkCount;
     }
-    fprintf(fLinks,"%e %lu %lu %lu %e %e\n",
+    fprintf(fLinks, "%e %lu %lu %lu %e %e\n",
             global.time,
             global.linkCount,
             global.slidingLinks,
@@ -24,6 +24,9 @@ void write_results() {
             global.meanLinkSat,
             global.meanSqLinkSat
             );
+
+    fprintf(fEnergy, "%e %e %e\n",
+            global.time, global.potEnergyElasNorm, global.potEnergyElasTg);
 
     //Calculate and write data for the 3Disk setup.
     if (global.nParticles == 3) {

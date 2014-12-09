@@ -15,7 +15,7 @@ particleParameters diskParameters;
 systemParameters global;
 links_3disks links3;
 
-FILE *fPhase, *fFirst, *fLast, *fLinkStat, *fLinks;
+FILE *fPhase, *fFirst, *fLast, *fLinkStat, *fLinks, *fEnergy;
 FILE *fp;
 
 void get_input();
@@ -137,6 +137,7 @@ int main(/*int argc, char *argv[]*/)
     fLast = fopen("ending_phase_space.out", "w");
     fLinkStat = fopen("3disk_linkstat.out", "w");
     fLinks = fopen("links.out", "w");
+    fEnergy = fopen("elastic_energy.out", "w");
 
     /*Initialize the packing and make nParticles include walls.*/
     printf("Simulating for %ld particles.\n", global.nParticles);
@@ -173,14 +174,9 @@ int main(/*int argc, char *argv[]*/)
         write_3disk_avglinkstat();
     }
 
-    free(particle);
-    free_cell();
-    free(nStats);
-    fclose(fFirst);
-    fclose(fPhase);
-    fclose(fLast);
-    fclose(fLinkStat);
-    fclose(fLinks);
+    free(particle); free_cell(); free(nStats);
+    fclose(fFirst); fclose(fPhase); fclose(fLast);
+    fclose(fLinkStat); fclose(fLinks); fclose(fEnergy);
     clock_time((int)iTime);
     return 0;
 }
@@ -285,6 +281,7 @@ void step() {
 
     global.meanLinkSat = global.meanSqLinkSat = 0;
     global.linkCount = global.changingLinks = global.slidingLinks = 0;
+    global.potEnergyElasNorm = global.potEnergyElasTg = 0;
 
     for (i = 0; i < nParticles; i++) {
         if (particle[i].type == 0) {

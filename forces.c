@@ -122,6 +122,8 @@ double normal_force_disk_disk(long i, long j, double r12,
     normalForce -= vGamma*sqrt(effMass)*(rx12n*vx12 + ry12n*vy12);
     normalForce = fmax(0, normalForce);
 
+    global.potEnergyElasNorm += 0.5*kn*(radsum - r12)*(radsum - r12);
+
     return normalForce;
 }
 
@@ -170,6 +172,8 @@ double tangential_force_disk_disk(double normalForce, long i,
     global.meanLinkSat += fabs(tangentialForce)/mu/normalForce;
     global.meanSqLinkSat +=
         tangentialForce/mu/normalForce*tangentialForce/mu/normalForce;
+
+    global.potEnergyElasTg += 0.5*kt*d_ss*d_ss;
 
     return tangentialForce;
 }
