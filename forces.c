@@ -52,6 +52,7 @@ void pair_force(long i, long j) {
     double rx12, ry12, r12sq, r12;
     double normalForce = 0, tangentialForce = 0;
     double radsum = particle[i].radius + particle[j].radius;
+    long l = i*global.nParticles + (j-1) - i*(i+3)/2;
 
     if (particle[i].type != 0 && particle[j].type != 0 ) return;
 
@@ -87,8 +88,17 @@ void pair_force(long i, long j) {
         /*Add torques*/
         particle[i].fw -= tangentialForce*r12*particle[i].radius/(radsum);
         particle[j].fw -= tangentialForce*r12*particle[j].radius/(radsum);
+
+        /*Link statistics*/
+        global.linkCount++;
+        if (nStats[l].touching == 0) global.changingLinks++;
+
     } else {
-        nStats[i*global.nParticles + (j-1) - i*(i+3)/2].touching = 0;
+        if (nStats[l].touching == 1) global.changingLinks++;
+        nStats[l].touching = 0;
+        nStats[l].nForce = nStats[l].tForce = 0;
+        nStats[l].stretch = 0;
+        nStats[l].sliding = 0;
     }
 
     return;
@@ -147,8 +157,19 @@ double tangential_force_disk_disk(double normalForce, long i,
         tangentialForce = copysign(coulombLimit, d_ss);
         d_ss = copysign(mu*normalForce/kt, d_ss);
         nStats[l].s0 = ss - d_ss;
+        nStats[l].sliding = 1;
+        global.slidingLinks++;
+    } else {
+        nStats[l].sliding = 0;
     }
 
+    /*Link statistics*/
+    nStats[l].stretch = d_ss;
+    nStats[l].nForce = normalForce;
+    nStats[l].tForce = tangentialForce;
+    global.meanLinkSat += fabs(tangentialForce)/mu/normalForce;
+    global.meanSqLinkSat +=
+        tangentialForce/mu/normalForce*tangentialForce/mu/normalForce;
 
     return tangentialForce;
 }

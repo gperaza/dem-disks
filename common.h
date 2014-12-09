@@ -11,6 +11,7 @@
 extern disk *particle;
 extern particleParameters diskParameters;
 extern systemParameters global;
+extern neighbor_stats *nStats;
 
 void step();
 void predictor_positions(disk*);
