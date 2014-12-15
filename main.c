@@ -1,8 +1,7 @@
 /*
   File name: main.c
 
-  This program simulates the time evolution of a set of disks in 2D
-
+  This program simulates the time evolution of a set of disks in 2D.
 */
 
 #include "common.h"
@@ -24,7 +23,11 @@ void write_results();
 void phase_plot(FILE*);
 void write_3disk_avglinkstat();
 
+/******************************************************************************/
+
 void get_input() {
+
+/******************************************************************************/
     char input[200];
     char type[200];
     char value[200];
@@ -117,7 +120,11 @@ void get_input() {
     return;
 }
 
+/******************************************************************************/
+
 int main(/*int argc, char *argv[]*/)
+
+/******************************************************************************/
 {
     time_t iTime = time(NULL);
     get_input();
@@ -181,7 +188,11 @@ int main(/*int argc, char *argv[]*/)
     return 0;
 }
 
+/******************************************************************************/
+
 long init_system() {
+
+/******************************************************************************/
     long nParticles = global.nParticles;
     double box_w = global.box_w;
     double box_h = global.box_h;
@@ -272,7 +283,11 @@ long init_system() {
     return (nParticles);
 }
 
+/******************************************************************************/
+
 void step() {
+
+/******************************************************************************/
 
     long i = 0;
     long nParticles = global.nParticles;
@@ -325,7 +340,33 @@ void step() {
     return;
 }
 
+/******************************************************************************/
+
 void clock_time(int iTime) {
+
+/******************************************************************************/
+/*
+  Purpose:
+
+    CLOCK_TIME prints CPU and wall time of execution.
+
+  Discussion:
+
+    Prints CPU time and wall time in human readable format since a starting time
+    given as a parameter.
+
+  Modified:
+
+    15 May 2014 by GGPM.
+
+  Author:
+
+    Gonzalo G. Peraza Mues (GGPM)
+
+  Parameters:
+
+    int iTime - Initial time.
+*/
     int days, hours, minutes, seconds;
     int tTime = (int)time(NULL) - iTime;
     int t;
