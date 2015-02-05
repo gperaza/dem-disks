@@ -54,7 +54,7 @@ void phase_plot(FILE* fp) {
     long i;
 
     /*Print the header of each frame with relevant information.*/
-    fprintf(fp, "#New Frame\n"
+    fprintf(fp, "#NewFrame\n"
             "#type:Disks3RadiiSinusoidalBottom\n"
             "#nParticles:%ld\n"
             "#time:%e\n"
@@ -63,6 +63,7 @@ void phase_plot(FILE* fp) {
             "#box_h:%lf\n"
             "#freq:%lf\n"
             "#dimensionlessAc:%lf\n"
+            "#epsilon:%lf\n"
             "#gravity:%lf\n"
             "#gravityAngle:%lf\n"
             "#bGamma:%lf\n"
@@ -78,6 +79,7 @@ void phase_plot(FILE* fp) {
             global.box_w,
             global.box_h,
             global.freq,
+            global.dimensionlessAc,
             global.epsilon,
             global.gravity,
             global.gravityAngle,
@@ -94,14 +96,14 @@ void phase_plot(FILE* fp) {
       id type radius mass iMoment
       x0 y0 w0 x1 y1 w1 x2 y2 w2 x3 y3 w3 x4 y4 w4 x5 y5 w5
       fx fy fw
-      xi yi posFixed rotFixed
+      xi yi wi posFixed rotFixed
     */
     for (i = 0; i < global.nParticles; i++) {
         fprintf(fp,"%ld %d %lf %lf %lf"
                 " %lf %lf %lf %lf %lf %lf %lf %lf %lf"
                 " %lf %lf %lf %lf %lf %lf %lf %lf %lf"
                 " %lf %lf %lf"
-                " %lf %lf %d %d"
+                " %lf %lf %lf %d %d"
                 "\n",
                 i, particle[i].type,
                 particle[i].radius, particle[i].mass, particle[i].iMoment,
@@ -112,7 +114,7 @@ void phase_plot(FILE* fp) {
                 particle[i].x4, particle[i].y4, particle[i].w4,
                 particle[i].x5, particle[i].y5, particle[i].w5,
                 particle[i].fx, particle[i].fy, particle[i].fw,
-                particle[i].xi, particle[i].yi,
+                particle[i].xi, particle[i].yi, particle[i].wi,
                 particle[i].posFixed, particle[i].rotFixed
                 );
     }

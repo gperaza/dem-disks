@@ -13,7 +13,8 @@ typedef struct disk
     double iMoment;
     int posFixed;
     int rotFixed;
-    double xi; double yi; /*Initial positions of disks (useful for vibrating)*/
+    /*Initial positions of disks (useful for vibrating)*/
+    double xi; double yi; double wi;
 } disk;
 
 typedef struct particleParameters

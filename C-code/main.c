@@ -164,6 +164,13 @@ int main(/*int argc, char *argv[]*/)
      }
 
     phase_plot(fFirst);
+    for (i = 0; i < global.nParticles; i++) {
+        if (particle[i].type == 0) {
+            particle[i].wi = particle[i].w0;
+            particle[i].xi = particle[i].x0;
+            particle[i].yi = particle[i].y0;
+        }
+    }
 
     relaxing = 0;
     for (i = 0; i < nStepsRun; i++) {
