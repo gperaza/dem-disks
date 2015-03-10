@@ -42,6 +42,7 @@ typedef struct systemParameters
     double timeForWrite;
     double a[5];
     double c[6];
+    int bCondType;
 
     unsigned long linkCount, slidingLinks, changingLinks;
     double meanLinkSat, meanSqLinkSat;

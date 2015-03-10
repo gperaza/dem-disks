@@ -59,19 +59,19 @@ void phase_plot(FILE* fp) {
             "#nParticles:%ld\n"
             "#time:%e\n"
             "#timestep:%e\n"
-            "#box_w:%lf\n"
-            "#box_h:%lf\n"
-            "#freq:%lf\n"
-            "#dimensionlessAc:%lf\n"
-            "#epsilon:%lf\n"
-            "#gravity:%lf\n"
-            "#gravityAngle:%lf\n"
-            "#bGamma:%lf\n"
-            "#vGamma:%lf\n"
-            "#density:%lf\n"
-            "#kn:%lf\n"
-            "#kt:%lf\n"
-            "#mu:%lf\n"
+            "#box_w:%e\n"
+            "#box_h:%e\n"
+            "#freq:%e\n"
+            "#dimensionlessAc:%e\n"
+            "#epsilon:%e\n"
+            "#gravity:%e\n"
+            "#gravityAngle:%e\n"
+            "#bGamma:%e\n"
+            "#vGamma:%e\n"
+            "#density:%e\n"
+            "#kn:%e\n"
+            "#kt:%e\n"
+            "#mu:%e\n"
             "#EndOfHeader\n",
             global.nParticles,
             global.time,
@@ -93,17 +93,18 @@ void phase_plot(FILE* fp) {
 
     /*Print the state of the system*/
     /*
-      id type radius mass iMoment
-      x0 y0 w0 x1 y1 w1 x2 y2 w2 x3 y3 w3 x4 y4 w4 x5 y5 w5
-      fx fy fw
-      xi yi wi posFixed rotFixed
+      0-id 1-type 2-radius 3-mass 4-iMoment
+      5-x0 6-y0 7-w0 8-x1 9-y1 10-w1 11-x2 12-y2 13-w2
+      14-x3 15-y3 16-w3 17-x4 18-y4 19-w4 20-x5 21-y5 22-w5
+      23-fx 24-fy 25-fw
+      26-xi 27-yi 28-wi 29-posFixed 30-rotFixed
     */
     for (i = 0; i < global.nParticles; i++) {
-        fprintf(fp,"%ld %d %lf %lf %lf"
-                " %lf %lf %lf %lf %lf %lf %lf %lf %lf"
-                " %lf %lf %lf %lf %lf %lf %lf %lf %lf"
-                " %lf %lf %lf"
-                " %lf %lf %lf %d %d"
+        fprintf(fp,"%ld %d %e %e %e"
+                " %e %e %e %e %e %e %e %e %e"
+                " %e %e %e %e %e %e %e %e %e"
+                " %e %e %e"
+                " %e %e %e %d %d"
                 "\n",
                 i, particle[i].type,
                 particle[i].radius, particle[i].mass, particle[i].iMoment,

@@ -6,6 +6,7 @@
 #include <math.h>
 #include <assert.h>
 #include <gsl/gsl_rng.h>
+#include <gsl/gsl_randist.h>
 #include "particle_structures.h"
 
 extern disk *particle;
@@ -22,7 +23,7 @@ long init_system();
 void set_constants(double);
 void make_forces();
 void graphics(int);
-void boundary_conditions(disk*);
+void boundary_conditions(disk*, int);
 void make_forces_linked_cell();
 void init_cell();
 void bulk_force(long, double, double);

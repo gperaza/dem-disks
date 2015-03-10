@@ -17,6 +17,8 @@ links_3disks links3;
 FILE *fPhase, *fFirst, *fLast, *fLinkStat, *fLinks, *fEnergy;
 FILE *fp;
 
+gsl_rng * rgen;
+
 void get_input();
 void clock_time(int);
 void write_results();
@@ -31,7 +33,7 @@ void get_input() {
     char input[200];
     char type[200];
     char value[200];
-    int inputs = 20, countInputs = 0;
+    int inputs = 21, countInputs = 0;
 
     if ( (fp = fopen("input_file", "r")) == NULL ) {
         printf("Error opening input file.\n");
@@ -49,58 +51,61 @@ void get_input() {
             printf("Seed for rng = %ld.\n", global.seed);
         } else if (strcmp(type,"#box_w") == 0) {
             sscanf(value, "%lf", &global.box_w);
-            printf("box_w = %lf disks.\n", global.box_w);
+            printf("box_w = %e disks.\n", global.box_w);
         } else if (strcmp(type,"#box_h") == 0) {
             sscanf(value, "%lf", &global.box_h);
-            printf("box_h = %lf disks.\n", global.box_h);
+            printf("box_h = %e disks.\n", global.box_h);
         } else if (strcmp(type,"#freq") == 0) {
             sscanf(value, "%lf", &global.freq);
-            printf("Bottom frequency = %lf Hz.\n", global.freq);
+            printf("Bottom frequency = %e Hz.\n", global.freq);
         } else if (strcmp(type,"#dimensionlessAc") == 0) {
             sscanf(value, "%lf", &global.dimensionlessAc);
-            printf("Bottom acceleration = %lf g's.\n", global.dimensionlessAc);
+            printf("Bottom acceleration = %e g's.\n", global.dimensionlessAc);
         } else if (strcmp(type,"#gravity") == 0) {
             sscanf(value, "%lf", &global.gravity);
-            printf("Gravity = %lf m/s^2.\n", global.gravity);
+            printf("Gravity = %e m/s^2.\n", global.gravity);
         } else if (strcmp(type,"#gravityAngle") == 0) {
             sscanf(value, "%lf", &global.gravityAngle);
-            printf("Gravity angle = %lf PI radians.\n", global.gravityAngle);
+            printf("Gravity angle = %e PI radians.\n", global.gravityAngle);
         } else if (strcmp(type,"#bGamma") == 0) {
             sscanf(value, "%lf", &global.bGamma);
-            printf("Bulk gamma = %lf. \n", global.bGamma);
+            printf("Bulk gamma = %e. \n", global.bGamma);
         } else if (strcmp(type,"#timestep") == 0) {
             sscanf(value, "%lf", &global.timestep);
-            printf("Time step = %lf s. \n", global.timestep);
+            printf("Time step = %e s. \n", global.timestep);
         } else if (strcmp(type,"#relaxTime") == 0) {
             sscanf(value, "%lf", &global.relaxTime);
-            printf("Relaxing time = %lf s. \n", global.relaxTime);
+            printf("Relaxing time = %e s. \n", global.relaxTime);
         } else if (strcmp(type,"#runTime") == 0) {
             sscanf(value, "%lf", &global.runTime);
-            printf("Simulation step = %lf s. \n", global.runTime);
+            printf("Simulation step = %e s. \n", global.runTime);
         } else if (strcmp(type,"#timeForGraph") == 0) {
             sscanf(value, "%lf", &global.timeForGraph);
-            printf("Time between graphics = %lf s. \n", global.timeForGraph);
+            printf("Time between graphics = %e s. \n", global.timeForGraph);
         } else if (strcmp(type,"#timeForWrite") == 0) {
             sscanf(value, "%lf", &global.timeForWrite);
-            printf("Time between writes = %lf s. \n", global.timeForWrite);
+            printf("Time between writes = %e s. \n", global.timeForWrite);
         } else if (strcmp(type,"#meanR") == 0) {
             sscanf(value, "%lf", &diskParameters.meanR);
-            printf("Mean disk radius = %lf m. \n", diskParameters.meanR);
+            printf("Mean disk radius = %e m. \n", diskParameters.meanR);
         } else if (strcmp(type,"#density") == 0) {
             sscanf(value, "%lf", &diskParameters.density);
-            printf("Disk's density = %lf kg/m^3. \n", diskParameters.density);
+            printf("Disk's density = %e kg/m^3. \n", diskParameters.density);
         } else if (strcmp(type,"#kn") == 0) {
             sscanf(value, "%lf", &diskParameters.kn);
-            printf("Normal elastic constant = %lf. \n", diskParameters.kn);
+            printf("Normal elastic constant = %e. \n", diskParameters.kn);
         } else if (strcmp(type,"#pr") == 0) {
             sscanf(value, "%lf", &diskParameters.pr);
-            printf("Disk's Poisson's ratio = %lf. \n", diskParameters.pr);
+            printf("Disk's Poisson's ratio = %e. \n", diskParameters.pr);
         } else if (strcmp(type,"#mu") == 0) {
             sscanf(value, "%lf", &diskParameters.mu);
-            printf("Disk's friction coefficient = %lf. \n", diskParameters.mu);
+            printf("Disk's friction coefficient = %e. \n", diskParameters.mu);
         } else if (strcmp(type,"#vGamma") == 0) {
             sscanf(value, "%lf", &diskParameters.vGamma);
-            printf("Viscoelastic gamma = %lf. \n", diskParameters.vGamma);
+            printf("Viscoelastic gamma = %e. \n", diskParameters.vGamma);
+        } else if (strcmp(type,"#bCondType") == 0) {
+            sscanf(value, "%d", &global.bCondType);
+            printf("Boundary conditions for bottom = %d. \n", global.bCondType);
         } else {
             printf("Unknown parameter.\n");
             exit(1);
@@ -114,9 +119,12 @@ void get_input() {
     global.box_w *= 2*diskParameters.meanR;
     global.box_h *= 2*diskParameters.meanR;
     global.gravityAngle *= M_PI;
-    global.epsilon = global.dimensionlessAc*global.gravity/
-        (4*M_PI*M_PI*global.freq*global.freq);
-
+    if (global.bCondType == 1) {
+        global.epsilon = global.dimensionlessAc*global.gravity/
+            (4*M_PI*M_PI*global.freq*global.freq);
+    } else if (global.bCondType == 2) {
+        global.epsilon = global.dimensionlessAc*diskParameters.meanR;
+    }
     return;
 }
 
@@ -134,7 +142,7 @@ int main(/*int argc, char *argv[]*/)
     long nStepsRun = (long)(global.runTime/timestep);
     long stepsForGraph = (long)(global.timeForGraph/timestep);
     long stepsForWrite = (long)(global.timeForWrite/timestep);
-    global.time = -timestep*nStepsRelax;
+    global.time = -timestep*nStepsRelax*2; //Two relaxation phases.
 
     /*Set up constants for the gear integrator.*/
     set_constants(timestep);
@@ -153,16 +161,30 @@ int main(/*int argc, char *argv[]*/)
 
     /*Initialize linked cells*/
     init_cell();
-
+    /*------------------------------------------------------------------------*/
     int relaxing = 1;
     long i;
+    double gravityAngleAux = global.gravityAngle;
+    global.gravityAngle = 0;
+    double epsilonAux = global.epsilon;
+    global.epsilon = 0;
     for (i = 0; i < nStepsRelax; i++) {
         if (!(i % stepsForGraph)) {
             graphics(relaxing);
         }
         step();
-     }
-
+        global.bGamma = (nStepsRelax-1-i)/(nStepsRelax-1)*100000;
+    }
+    //Tilt system and turn on vibration.
+    global.gravityAngle = gravityAngleAux;
+    global.epsilon = epsilonAux;
+    for (i = 0; i < nStepsRelax; i++) {
+        if (!(i % stepsForGraph)) {
+            graphics(relaxing);
+        }
+        step();
+    }
+    /*------------------------------------------------------------------------*/
     phase_plot(fFirst);
     for (i = 0; i < global.nParticles; i++) {
         if (particle[i].type == 0) {
@@ -171,7 +193,7 @@ int main(/*int argc, char *argv[]*/)
             particle[i].yi = particle[i].y0;
         }
     }
-
+    /*------------------------------------------------------------------------*/
     relaxing = 0;
     for (i = 0; i < nStepsRun; i++) {
         if (!(i % stepsForGraph)) {
@@ -216,7 +238,8 @@ long init_system() {
     long nDisks = nParticles;
     double sigma = meanR*0.25;
     disk tempParticle;
-    gsl_rng * rgen = gsl_rng_alloc(gsl_rng_mt19937);
+
+    rgen = gsl_rng_alloc(gsl_rng_mt19937);
     gsl_rng_set(rgen, seed);
 
     assert(nDisks > 0);
@@ -287,6 +310,10 @@ long init_system() {
         nStats[i].touching = 0;
     }
 
+    /*Restart RNG for simulation.*/
+    rgen = gsl_rng_alloc(gsl_rng_mt19937);
+    gsl_rng_set(rgen, global.seed);
+
     return (nParticles);
 }
 
@@ -310,7 +337,8 @@ void step() {
             if (particle[i].posFixed == 0) predictor_positions(&particle[i]);
             if (particle[i].rotFixed == 0) predictor_rotations(&particle[i]);
         }
-        if (particle[i].type == 1) boundary_conditions(&particle[i]);
+        if (particle[i].type == 1) boundary_conditions(&particle[i],
+                                                       global.bCondType);
     }
     make_forces();
     //make_forces_linked_cell();

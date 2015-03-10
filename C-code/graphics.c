@@ -140,7 +140,7 @@ void draw_data(cairo_t *cr, double box_w, double box_h, double time) {
     double arrow_x = box_w + (1-SHRINK)/4*box_w/SHRINK;
     double arrow_y =  -(1-SHRINK)/4*box_h/SHRINK;
     double arrow_r =  fmin((1-SHRINK)/4*box_w/SHRINK, -arrow_y)*0.95;
-    double arrow_angle = -M_PI/2;
+    double arrow_angle = -M_PI/2+global.gravityAngle;
     double head_angle = M_PI/3.5 + M_PI - arrow_angle;
     double head_angle2 = -M_PI/3.5 + 2*M_PI - arrow_angle;
     double head_r = arrow_r*0.25;

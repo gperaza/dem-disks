@@ -134,14 +134,26 @@ void set_constants(double timestep) {
     return;
 }
 
-void boundary_conditions(disk *particle) {
+extern gsl_rng * rgen;
+void boundary_conditions(disk *particle, int b_cond) {
     double epsilon = global.epsilon;
     double freq = global.freq;
     double time = global.time;
 
-    /*Implement boundary conditions for bottom*/
-    particle->y0 = particle->yi + epsilon*sin(2*M_PI*freq*time);
-    particle->y1 = epsilon*2*M_PI*freq*cos(2*M_PI*freq*time);
-
+    switch (b_cond) {
+    case 1:
+        /*Sinusoidal displacement*/
+        particle->y0 = particle->yi + epsilon*sin(2*M_PI*freq*time);
+        particle->y1 = epsilon*2*M_PI*freq*cos(2*M_PI*freq*time);
+        break;
+    case 2:
+        /*Random vibration*/
+        particle->y0 = particle->yi + epsilon*gsl_ran_flat(rgen, -1, 1);
+        particle->x0 = particle->xi + epsilon*gsl_ran_flat(rgen, -1, 1);
+        break;
+    default:
+        /*Free relaxation*/
+        break;
+    }
     return;
 }
