@@ -37,7 +37,7 @@ typedef struct systemParameters
     long seed;
     double time;
     double timestep;
-    double relaxTime; double runTime;
+    double relaxTime; double runTime; double thermalTime;
     double timeForGraph;
     double timeForWrite;
     double a[5];

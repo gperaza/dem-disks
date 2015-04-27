@@ -33,7 +33,7 @@ void get_input() {
     char input[200];
     char type[200];
     char value[200];
-    int inputs = 21, countInputs = 0;
+    int inputs = 22, countInputs = 0;
 
     if ( (fp = fopen("input_file", "r")) == NULL ) {
         printf("Error opening input file.\n");
@@ -78,7 +78,7 @@ void get_input() {
             printf("Relaxing time = %e s. \n", global.relaxTime);
         } else if (strcmp(type,"#runTime") == 0) {
             sscanf(value, "%lf", &global.runTime);
-            printf("Simulation step = %e s. \n", global.runTime);
+            printf("Simulation time = %e s. \n", global.runTime);
         } else if (strcmp(type,"#timeForGraph") == 0) {
             sscanf(value, "%lf", &global.timeForGraph);
             printf("Time between graphics = %e s. \n", global.timeForGraph);
@@ -106,6 +106,9 @@ void get_input() {
         } else if (strcmp(type,"#bCondType") == 0) {
             sscanf(value, "%d", &global.bCondType);
             printf("Boundary conditions for bottom = %d. \n", global.bCondType);
+        } else if (strcmp(type,"#thermalTime") == 0) {
+            sscanf(value, "%lf", &global.thermalTime);
+            printf("Thermalization time = %lf. \n", global.thermalTime);
         } else {
             printf("Unknown parameter.\n");
             exit(1);
@@ -124,6 +127,9 @@ void get_input() {
             (4*M_PI*M_PI*global.freq*global.freq);
     } else if (global.bCondType == 2) {
         global.epsilon = global.dimensionlessAc*diskParameters.meanR;
+    } else {
+        printf("No excitation chosen");
+        exit(0);
     }
     return;
 }
@@ -139,10 +145,11 @@ int main(/*int argc, char *argv[]*/)
 
     double timestep = global.timestep;
     long nStepsRelax = (long)(global.relaxTime/timestep);
+    long nStepsThermal = (long)(global.thermalTime/timestep);
     long nStepsRun = (long)(global.runTime/timestep);
     long stepsForGraph = (long)(global.timeForGraph/timestep);
     long stepsForWrite = (long)(global.timeForWrite/timestep);
-    global.time = -timestep*nStepsRelax*2; //Two relaxation phases.
+    global.time = -timestep*nStepsRelax - timestep*nStepsThermal;
 
     /*Set up constants for the gear integrator.*/
     set_constants(timestep);
@@ -172,17 +179,17 @@ int main(/*int argc, char *argv[]*/)
         if (!(i % stepsForGraph)) {
             graphics(relaxing);
         }
-        step();
+        step(i);
         global.bGamma = (nStepsRelax-1-i)/(nStepsRelax-1)*100000;
     }
     //Tilt system and turn on vibration.
     global.gravityAngle = gravityAngleAux;
     global.epsilon = epsilonAux;
-    for (i = 0; i < nStepsRelax; i++) {
+    for (i = 0; i < nStepsThermal; i++) {
         if (!(i % stepsForGraph)) {
             graphics(relaxing);
         }
-        step();
+        step(i);
     }
     /*------------------------------------------------------------------------*/
     phase_plot(fFirst);
@@ -202,7 +209,7 @@ int main(/*int argc, char *argv[]*/)
         if (!(i % stepsForWrite)) {
             write_results();
         }
-        step();
+        step(i);
     }
 
     phase_plot(fLast);
@@ -319,7 +326,7 @@ long init_system() {
 
 /******************************************************************************/
 
-void step() {
+void step(long kstep) {
 
 /******************************************************************************/
 
@@ -338,7 +345,7 @@ void step() {
             if (particle[i].rotFixed == 0) predictor_rotations(&particle[i]);
         }
         if (particle[i].type == 1) boundary_conditions(&particle[i],
-                                                       global.bCondType);
+                                                       global.bCondType, kstep);
     }
     make_forces();
     //make_forces_linked_cell();

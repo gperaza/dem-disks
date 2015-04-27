@@ -135,10 +135,11 @@ void set_constants(double timestep) {
 }
 
 extern gsl_rng * rgen;
-void boundary_conditions(disk *particle, int b_cond) {
+void boundary_conditions(disk *particle, int b_cond, long kstep) {
     double epsilon = global.epsilon;
     double freq = global.freq;
     double time = global.time;
+    long stepsForVib = (long)(1/(freq*global.timestep));
 
     switch (b_cond) {
     case 1:
@@ -148,11 +149,15 @@ void boundary_conditions(disk *particle, int b_cond) {
         break;
     case 2:
         /*Random vibration*/
-        particle->y0 = particle->yi + epsilon*gsl_ran_flat(rgen, -1, 1);
-        particle->x0 = particle->xi + epsilon*gsl_ran_flat(rgen, -1, 1);
+        if (kstep % stepsForVib == 0) {
+            particle->y0 = particle->yi + epsilon*gsl_ran_flat(rgen, -1, 1);
+            particle->x0 = particle->xi + epsilon*gsl_ran_flat(rgen, -1, 1);
+        }
         break;
     default:
         /*Free relaxation*/
+        printf("No excitation implemented\n");
+        exit(0);
         break;
     }
     return;

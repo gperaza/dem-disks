@@ -14,7 +14,7 @@ extern particleParameters diskParameters;
 extern systemParameters global;
 extern neighbor_stats *nStats;
 
-void step();
+void step(long);
 void predictor_positions(disk*);
 void predictor_rotations(disk*);
 void corrector_positions(disk*);
@@ -23,7 +23,7 @@ long init_system();
 void set_constants(double);
 void make_forces();
 void graphics(int);
-void boundary_conditions(disk*, int);
+void boundary_conditions(disk*, int, long);
 void make_forces_linked_cell();
 void init_cell();
 void bulk_force(long, double, double);

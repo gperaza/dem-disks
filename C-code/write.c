@@ -72,6 +72,7 @@ void phase_plot(FILE* fp) {
             "#kn:%e\n"
             "#kt:%e\n"
             "#mu:%e\n"
+            "#bCondType:%d\n"
             "#EndOfHeader\n",
             global.nParticles,
             global.time,
@@ -88,7 +89,8 @@ void phase_plot(FILE* fp) {
             diskParameters.density,
             diskParameters.kn,
             diskParameters.kt,
-            diskParameters.mu
+            diskParameters.mu,
+            global.bCondType
             );
 
     /*Print the state of the system*/
