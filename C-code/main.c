@@ -3,6 +3,7 @@
 
   This program simulates the time evolution of a set of disks in 2D.
 */
+#define GRAPHICS
 
 #include "common.h"
 #include <string.h>
@@ -176,19 +177,25 @@ int main(/*int argc, char *argv[]*/)
     double epsilonAux = global.epsilon;
     global.epsilon = 0;
     for (i = 0; i < nStepsRelax; i++) {
+#ifdef GRAPHICS
         if (!(i % stepsForGraph)) {
             graphics(relaxing);
         }
+#endif
         step(i);
         global.bGamma = (nStepsRelax-1-i)/(nStepsRelax-1)*100000;
     }
-    //Tilt system and turn on vibration.
+    /*Tilt system and turn on vibration. Thermalization.
+     Define phase such that vibration starts smoothly from zero.*/
+    global.phase = 2*M_PI*global.freq*global.time;
     global.gravityAngle = gravityAngleAux;
     global.epsilon = epsilonAux;
     for (i = 0; i < nStepsThermal; i++) {
+#ifdef GRAPHICS
         if (!(i % stepsForGraph)) {
             graphics(relaxing);
         }
+#endif
         step(i);
     }
     /*------------------------------------------------------------------------*/
@@ -200,12 +207,18 @@ int main(/*int argc, char *argv[]*/)
             particle[i].yi = particle[i].y0;
         }
     }
+    //Restart 3disk statistics to forget relaxation.
+    links3.op_op = links3.op_sl = links3.op_cl = links3.sl_op = links3.sl_sl =
+        links3.sl_cl = links3.cl_op = links3.cl_sl = links3.cl_cl = 0;
+    links3.lstkount = 0;
     /*------------------------------------------------------------------------*/
     relaxing = 0;
     for (i = 0; i < nStepsRun; i++) {
+#ifdef GRAPHICS
         if (!(i % stepsForGraph)) {
             graphics(relaxing);
         }
+#endif
         if (!(i % stepsForWrite)) {
             write_results();
         }
