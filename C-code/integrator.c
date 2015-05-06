@@ -145,7 +145,7 @@ void boundary_conditions(disk *particle, int b_cond, long kstep) {
     switch (b_cond) {
     case 1:
         /*Sinusoidal displacement*/
-        particle->y0 = particle->yi + epsilon*sin(2*M_PI*freq*time);
+        particle->y0 = particle->yi + epsilon*sin(2*M_PI*freq*time - phase);
         particle->y1 = epsilon*2*M_PI*freq*cos(2*M_PI*freq*time - phase);
         break;
     case 2:

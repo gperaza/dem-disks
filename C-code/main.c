@@ -3,7 +3,7 @@
 
   This program simulates the time evolution of a set of disks in 2D.
 */
-#define GRAPHICS
+//#define GRAPHICS
 
 #include "common.h"
 #include <string.h>
@@ -34,7 +34,7 @@ void get_input() {
     char input[200];
     char type[200];
     char value[200];
-    int inputs = 22, countInputs = 0;
+    int inputs = 23, countInputs = 0;
 
     if ( (fp = fopen("input_file", "r")) == NULL ) {
         printf("Error opening input file.\n");
@@ -110,6 +110,10 @@ void get_input() {
         } else if (strcmp(type,"#thermalTime") == 0) {
             sscanf(value, "%lf", &global.thermalTime);
             printf("Thermalization time = %lf. \n", global.thermalTime);
+        } else if (strcmp(type,"#relInitDips") == 0) {
+            sscanf(value, "%lf", &global.relInitDisp);
+            printf("Relative initial displacement for bottom (-1,1) = %lf. \n",
+                   global.relInitDisp);
         } else {
             printf("Unknown parameter.\n");
             exit(1);
@@ -183,11 +187,14 @@ int main(/*int argc, char *argv[]*/)
         }
 #endif
         step(i);
+        if (!(i % stepsForWrite)) {
+            write_results();
+        }
         global.bGamma = (nStepsRelax-1-i)/(nStepsRelax-1)*100000;
     }
     /*Tilt system and turn on vibration. Thermalization.
      Define phase such that vibration starts smoothly from zero.*/
-    global.phase = 2*M_PI*global.freq*global.time;
+    global.phase = 2*M_PI*global.freq*global.time - asin(global.relInitDisp);
     global.gravityAngle = gravityAngleAux;
     global.epsilon = epsilonAux;
     for (i = 0; i < nStepsThermal; i++) {
@@ -196,6 +203,9 @@ int main(/*int argc, char *argv[]*/)
             graphics(relaxing);
         }
 #endif
+        if (!(i % stepsForWrite)) {
+            write_results();
+        }
         step(i);
     }
     /*------------------------------------------------------------------------*/
@@ -277,6 +287,8 @@ long init_system() {
         /*Store initial positions for boundary conditions*/
         particle[i].xi = particle[i].x0;
         particle[i].yi = particle[i].y0;
+        /*Set initial displacement of bottom*/
+        particle[i].yi += global.epsilon*global.relInitDisp;
         /*Set disk properties*/
         particle[i].mass = density*particle[i].radius*particle[i].radius*M_PI;
         particle[i].iMoment =

@@ -32,7 +32,7 @@ typedef struct systemParameters
     double box_w; double box_h;
     double gravity; double gravityAngle;
     double bGamma;
-    double freq; double epsilon; double phase;
+    double freq; double epsilon; double phase; double relInitDisp;
     double dimensionlessAc;
     long seed;
     double time;
