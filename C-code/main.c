@@ -110,7 +110,7 @@ void get_input() {
         } else if (strcmp(type,"#thermalTime") == 0) {
             sscanf(value, "%lf", &global.thermalTime);
             printf("Thermalization time = %lf. \n", global.thermalTime);
-        } else if (strcmp(type,"#relInitDips") == 0) {
+        } else if (strcmp(type,"#relInitDisp") == 0) {
             sscanf(value, "%lf", &global.relInitDisp);
             printf("Relative initial displacement for bottom (-1,1) = %lf. \n",
                    global.relInitDisp);
