@@ -3,3 +3,5 @@
 disks
 *.svg
 Test/
+/python-scripts/Deprecated/
+/python-scripts/plots_3disks_lib.pyc
