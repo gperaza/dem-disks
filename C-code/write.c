@@ -28,7 +28,11 @@ void write_results() {
     fprintf(fEnergy, "%e %e %e\n",
             global.time, global.potEnergyElasNorm, global.potEnergyElasTg);
 
-    //Calculate and write data for the 3Disk setup.
+    /*Calculate and write data for the 3Disk setup.*/
+    /*0-time
+      1-touching  2-sliding  3-nForce   4-tForce   5-stretch   6-s0
+      7-touching  8-sliding  9-nForce  10-tForce  11-stretch  12-s0
+    */
     if (global.nParticles == 3) {
         fprintf(fLinkStat,
                 "%18.12e %u %u %18.12e %18.12e %18.12e %18.12e"
