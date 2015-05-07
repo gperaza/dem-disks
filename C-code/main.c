@@ -288,7 +288,7 @@ long init_system() {
         particle[i].xi = particle[i].x0;
         particle[i].yi = particle[i].y0;
         /*Set initial displacement of bottom*/
-        particle[i].yi += global.epsilon*global.relInitDisp;
+        particle[i].y0 += global.epsilon*global.relInitDisp;
         /*Set disk properties*/
         particle[i].mass = density*particle[i].radius*particle[i].radius*M_PI;
         particle[i].iMoment =

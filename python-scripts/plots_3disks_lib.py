@@ -169,6 +169,7 @@ def plot_center_path(directory=".", show=False, iTime=0, fTime=float("inf"),
     lc.set_linewidth(5)
     if ax is not None:
         ax.add_collection(lc)
+        plt.sca(ax)
     else:
         fig = plt.figure(figsize=(12,8))
         plt.gca().add_collection(lc)
@@ -265,6 +266,81 @@ def hist_links(directory='.', show=False):
         plt.show()
     else:
         plt.savefig(directory + "/links2.png", format="png")
+    plt.close()
+
+def hist_links_interval(directory='.', show=False,
+                        iTime=-float("inf"), fTime=float("inf"), ax=None):
+    """Makes histograms from links statistics in a particular
+    interval. Useful for high resolution data files, if data is not
+    high res, used the full simulation data instead.
+
+    """
+    dataFile = directory + "/3disk_linkstat.out"
+    op_op = 0
+    op_sl = 0
+    op_cl = 0
+    sl_op = 0
+    sl_sl = 0
+    sl_cl = 0
+    cl_op = 0
+    cl_sl = 0
+    cl_cl = 0
+    linkCount = 0
+    readerFile = open(dataFile, "r")
+    reader = csv.reader(readerFile, delimiter = " ")
+    for row in reader:
+        currTime = float(row[0])
+        if iTime <= currTime <= fTime:
+            tch1 = int(row[1])
+            tch2 = int(row[7])
+            sl1 = int(row[2])
+            sl2 = int(row[8])
+            op_op += (1 - tch1)*(1 - tch2)
+            op_sl += (1 - tch1)*sl2
+            op_cl += (1 - tch1)*tch2*(1 - sl2)
+            sl_op += sl1*(1 - tch2)
+            sl_sl += sl1*sl2
+            sl_cl += sl1*tch2*(1 - sl2)
+            cl_op += tch1*(1 - sl1)*(1 - tch2)
+            cl_sl += tch1*(1 - sl1)*sl2
+            cl_cl += tch1*(1 - sl1)*tch2*(1 - sl2)
+            linkCount += 1
+    readerFile.close()
+    assert(op_op + op_sl + op_cl + sl_op + sl_sl + sl_cl + cl_op + cl_sl + cl_cl
+           == linkCount)
+    op_op /= float(linkCount)
+    op_sl /= float(linkCount)
+    op_cl /= float(linkCount)
+    sl_op /= float(linkCount)
+    sl_sl /= float(linkCount)
+    sl_cl /= float(linkCount)
+    cl_op /= float(linkCount)
+    cl_sl /= float(linkCount)
+    cl_cl /= float(linkCount)
+    #Second histogram, individual probabilities.
+    links = [op_op, op_sl, op_cl, sl_op, sl_sl, sl_cl, cl_op, cl_sl, cl_cl]
+    index = np.arange(len(links))
+    bar_width = 0.5
+    opacity = 0.4
+    links = plt.bar(index-bar_width/2, links, bar_width,
+                    alpha=opacity,
+                    color='b',
+                    label='link1_link2')
+    if ax is not None:
+        plt.sca(ax)
+    plt.ylabel('Time fraction')
+    plt.title('Links status')
+    plt.xticks(index, ("op_op", "op_sl", "op_cl",
+                                      "sl_op", "sl_sl", "sl_cl",
+                                      "cl_op", "cl_sl", "cl_cl"))
+    plt.tight_layout()
+    autolabel(links)
+    if ax is not None:
+        return
+    if show:
+        plt.show()
+    else:
+        plt.savefig(directory + "/links_interval.png", format="png")
     plt.close()
 
 def plot_vel_ac_for_tilt(tilt, ax=None, show=False):
@@ -528,7 +604,7 @@ def plot_compare_supperpose(show=False,
                     legend=False, color="b")
     plot_coord_time(coord="w", diskId="0", iTime=iTime, fTime=fTime, ax=ax3b,
                     legend=False, color="r")
-    plot_center_path(iTime=9.9, fTime=9.9125, ax=ax4)
+    hist_links_interval(iTime=iTime, fTime=fTime, ax=ax4)
     plt.tight_layout()
     if show:
         plt.show()
@@ -536,7 +612,7 @@ def plot_compare_supperpose(show=False,
         plt.savefig("compare_sup.png", format="png")
 
 def link_stats_coord(coord, directory=".", show=False, iTime=-float("inf"),
-                     fTime = float("inf")):
+                     fTime = float("inf"), gs=None):
     dataFile = directory + "/3disk_linkstat.out"
     time = []
     linkStatus1 = []
@@ -556,8 +632,9 @@ def link_stats_coord(coord, directory=".", show=False, iTime=-float("inf"),
     colors1 = linkStatus1/2.0
     colors2 = linkStatus2/2.0
     dx = abs(time[1]-time[0])
-    gs = gridspec.GridSpec(10,1)
-    gs.update(hspace=0.05)
+    if not gs is not None:
+        gs = gridspec.GridSpec(10,1)
+    #gs.update(hspace=0.05)
     ax1 = plt.subplot(gs[:-2,:])
     ax2 = plt.subplot(gs[8,:])
     ax3 = plt.subplot(gs[9,:])
@@ -583,3 +660,19 @@ def link_stats_coord(coord, directory=".", show=False, iTime=-float("inf"),
     ax3.set_xlabel("time(s)")
     if show:
         plt.show()
+
+def plot_compare_links(show=False, iTime=-float("inf"), fTime=float("inf")):
+    fig = plt.figure(figsize=(24,16))
+    gs = gridspec.GridSpec(2,2)
+    gs1 = gridspec.GridSpecFromSubplotSpec(10, 1, subplot_spec=gs[0])
+    gs2 = gridspec.GridSpecFromSubplotSpec(10, 1, subplot_spec=gs[1])
+    gs3 = gridspec.GridSpecFromSubplotSpec(10, 1, subplot_spec=gs[2])
+    ax4 = plt.subplot(gs[1,1])
+    link_stats_coord(coord="x", gs=gs1, iTime=iTime, fTime=fTime)
+    link_stats_coord(coord="y", gs=gs2, iTime=iTime, fTime=fTime)
+    link_stats_coord(coord="w", gs=gs3, iTime=iTime, fTime=fTime)
+    plot_center_path(ax=ax4, iTime=iTime, fTime=fTime)
+    if show:
+        plt.show()
+    else:
+        plt.savefig("compare_links.png", format="png")

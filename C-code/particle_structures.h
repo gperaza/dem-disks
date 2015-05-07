@@ -57,8 +57,7 @@ typedef struct neighbor_stats
     double nForce; double tForce;
     unsigned int sliding;
     double stretch;
-
-b} neighbor_stats;
+} neighbor_stats;
 
 typedef struct link_stats_3disk
 {
