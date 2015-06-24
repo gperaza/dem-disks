@@ -1,8 +1,9 @@
 CFLAGS = -Wall -O2 -std=gnu99 $(shell pkg-config --cflags  cairo)
 GRAPHLIBS = $(shell pkg-config --libs cairo)
 LIBS = -lm -lgsl -lgslcblas
+CC = gcc
 
-CC= gcc
+GIT_VERSION = $(shell git describe )
 
 HDRS = common.h particle_structures.h
 OBJS = main.o graphics.o integrator.o forces.o linkcell.o write.o

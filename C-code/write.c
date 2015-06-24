@@ -104,6 +104,7 @@ void phase_plot(FILE* fp) {
       14-x3 15-y3 16-w3 17-x4 18-y4 19-w4 20-x5 21-y5 22-w5
       23-fx 24-fy 25-fw
       26-xi 27-yi 28-wi 29-posFixed 30-rotFixed
+    TODO: add fn and ft to this output to make it easier to analyze collisions.
     */
     for (i = 0; i < global.nParticles; i++) {
         fprintf(fp,"%ld %d %e %e %e"

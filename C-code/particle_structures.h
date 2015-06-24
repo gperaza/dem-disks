@@ -33,6 +33,7 @@ typedef struct systemParameters
     double gravity; double gravityAngle;
     double bGamma;
     double freq; double epsilon; double phase; double relInitDisp;
+    double vibrating;
     double dimensionlessAc;
     long seed;
     double time;

@@ -90,8 +90,10 @@ void pair_force(long i, long j) {
         particle[j].fx -= -ry12n*tangentialForce;
         particle[j].fy -= rx12n*tangentialForce;
         /*Add torques*/
-        particle[i].fw -= tangentialForce*r12*particle[i].radius/(radsum);
-        particle[j].fw -= tangentialForce*r12*particle[j].radius/(radsum);
+        //particle[i].fw -= tangentialForce*r12*particle[i].radius/(radsum);
+        //particle[j].fw -= tangentialForce*r12*particle[j].radius/(radsum);
+        particle[i].fw -= tangentialForce*particle[i].radius;
+        particle[j].fw -= tangentialForce*particle[j].radius;
 
     } else {
         if (nStats[l].touching == 1) global.changingLinks++;
@@ -108,6 +110,7 @@ double normal_force_disk_disk(long i, long j, double r12,
                               double rx12n, double ry12n, double radsum) {
     double kn = diskParameters.kn;
     double vGamma = diskParameters.vGamma;
+    double effMass;
 
     double normalForce = 0;
 
@@ -115,8 +118,14 @@ double normal_force_disk_disk(long i, long j, double r12,
     double vx12 = particle[i].x1 - particle[j].x1;
     double vy12 = particle[i].y1 - particle[j].y1;
 
-    double effMass = particle[i].mass*particle[j].mass/(particle[i].mass
-                                                        + particle[j].mass);
+    if (particle[i].type == particle[j].type){
+        effMass = particle[i].mass*particle[j].mass/(particle[i].mass
+                                                     + particle[j].mass);
+    } else if (particle[i].type == 1) {
+        effMass = particle[j].mass;
+    } else {
+        effMass = particle[i].mass;
+    }
 
     normalForce = kn*(radsum - r12);
     normalForce -= vGamma*sqrt(effMass)*(rx12n*vx12 + ry12n*vy12);

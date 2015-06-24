@@ -3,7 +3,9 @@
 
   This program simulates the time evolution of a set of disks in 2D.
 */
+
 //#define GRAPHICS
+#define COLLISIONS
 
 #include "common.h"
 #include <string.h>
@@ -145,6 +147,14 @@ int main(/*int argc, char *argv[]*/)
 
 /******************************************************************************/
 {
+    /*Make sure the time-step is at least 10-2 the duration of a
+      binary collision and at least 10-2 the duration of a tangential
+      oscillatory period. TODO*/
+    double meanMass =
+        diskParameters.meanR*diskParameters.meanR*M_PI*diskParameters.density;
+    double binaryT = sqrt(meanMass/diskParameters.kn);
+    //assert(global.timestep <= 0.01*binaryT);
+
     time_t iTime = time(NULL);
     get_input();
 
@@ -178,8 +188,7 @@ int main(/*int argc, char *argv[]*/)
     long i;
     double gravityAngleAux = global.gravityAngle;
     global.gravityAngle = 0;
-    double epsilonAux = global.epsilon;
-    global.epsilon = 0;
+    global.vibrating = 0;
     for (i = 0; i < nStepsRelax; i++) {
 #ifdef GRAPHICS
         if (!(i % stepsForGraph)) {
@@ -188,7 +197,7 @@ int main(/*int argc, char *argv[]*/)
 #endif
         step(i);
         if (!(i % stepsForWrite)) {
-            write_results();
+            //write_results();
         }
         global.bGamma = (nStepsRelax-1-i)/(nStepsRelax-1)*100000;
     }
@@ -196,7 +205,7 @@ int main(/*int argc, char *argv[]*/)
      Define phase such that vibration starts smoothly from zero.*/
     global.phase = 2*M_PI*global.freq*global.time - asin(global.relInitDisp);
     global.gravityAngle = gravityAngleAux;
-    global.epsilon = epsilonAux;
+    global.vibrating = 1;
     for (i = 0; i < nStepsThermal; i++) {
 #ifdef GRAPHICS
         if (!(i % stepsForGraph)) {
@@ -204,7 +213,7 @@ int main(/*int argc, char *argv[]*/)
         }
 #endif
         if (!(i % stepsForWrite)) {
-            write_results();
+            //write_results();
         }
         step(i);
     }
