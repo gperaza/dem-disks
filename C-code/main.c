@@ -4,9 +4,6 @@
   This program simulates the time evolution of a set of disks in 2D.
 */
 
-//#define GRAPHICS
-#define COLLISIONS
-
 #include "common.h"
 #include <string.h>
 #include <time.h>
@@ -147,6 +144,9 @@ int main(/*int argc, char *argv[]*/)
 
 /******************************************************************************/
 {
+    /*First, print the version of the program used.*/
+    printf("Version: %s\n", VERSION);
+
     /*Make sure the time-step is at least 10-2 the duration of a
       binary collision and at least 10-2 the duration of a tangential
       oscillatory period. TODO*/
