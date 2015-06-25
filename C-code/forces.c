@@ -56,6 +56,10 @@ void pair_force(long i, long j) {
 
     if (particle[i].type != 0 && particle[j].type != 0 ) return;
 
+#ifdef COLLISIONS
+    nStats[l].pretouching = nStats[l].touching;
+#endif
+
     rx12 = particle[i].x0 - particle[j].x0;
     ry12 = particle[i].y0 - particle[j].y0;
 
@@ -68,7 +72,9 @@ void pair_force(long i, long j) {
 
         /*Link statistics*/
         global.linkCount++;
-        if (nStats[l].touching == 0) global.changingLinks++;
+        if (nStats[l].touching == 0) {
+            global.changingLinks++;
+        }
 
         r12 = sqrt(r12sq);
         /*Normalized versor*/
@@ -96,7 +102,9 @@ void pair_force(long i, long j) {
         particle[j].fw -= tangentialForce*particle[j].radius;
 
     } else {
-        if (nStats[l].touching == 1) global.changingLinks++;
+        if (nStats[l].touching == 1) {
+            global.changingLinks++;
+        }
         nStats[l].touching = 0;
         nStats[l].nForce = nStats[l].tForce = 0;
         nStats[l].stretch = 0;

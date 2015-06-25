@@ -54,6 +54,7 @@ typedef struct systemParameters
 typedef struct neighbor_stats
 {
     unsigned int touching;
+    unsigned int pretouching;
     double s0;
     double nForce; double tForce;
     unsigned int sliding;
@@ -65,3 +66,13 @@ typedef struct link_stats_3disk
     double op_op, op_sl, op_cl, sl_op, sl_sl, sl_cl, cl_op, cl_sl, cl_cl;
     unsigned long lstkount;
 } links_3disks;
+
+typedef struct collision_temp_array
+{
+    double time;
+    double Fn; double Ft;
+    double gn; double gt;
+    double x; double y; double theta;
+    double vx; double vy; double w; double vt0;
+
+} collision_temp_array;

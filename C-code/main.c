@@ -16,6 +16,7 @@ links_3disks links3;
 
 FILE *fPhase, *fFirst, *fLast, *fLinkStat, *fLinks, *fEnergy;
 FILE *fp;
+FILE *fCollisions;
 
 gsl_rng * rgen;
 
@@ -27,9 +28,10 @@ void write_3disk_avglinkstat();
 
 /******************************************************************************/
 
-void get_input() {
+void get_input()
 
 /******************************************************************************/
+{
     char input[200];
     char type[200];
     char value[200];
@@ -162,7 +164,9 @@ int main(/*int argc, char *argv[]*/)
     long nStepsRelax = (long)(global.relaxTime/timestep);
     long nStepsThermal = (long)(global.thermalTime/timestep);
     long nStepsRun = (long)(global.runTime/timestep);
+#ifdef GRAPHICS
     long stepsForGraph = (long)(global.timeForGraph/timestep);
+#endif
     long stepsForWrite = (long)(global.timeForWrite/timestep);
     global.time = -timestep*nStepsRelax - timestep*nStepsThermal;
 
@@ -175,6 +179,9 @@ int main(/*int argc, char *argv[]*/)
     fLinkStat = fopen("3disk_linkstat.out", "w");
     fLinks = fopen("links.out", "w");
     fEnergy = fopen("elastic_energy.out", "w");
+#ifdef COLLISIONS
+    fCollisions = fopen("collisions.out", "w");
+#endif
 
     /*Initialize the packing and make nParticles include walls.*/
     printf("Simulating for %ld particles.\n", global.nParticles);
@@ -184,7 +191,9 @@ int main(/*int argc, char *argv[]*/)
     /*Initialize linked cells*/
     init_cell();
     /*------------------------------------------------------------------------*/
+#ifdef GRAPHICS
     int relaxing = 1;
+#endif
     long i;
     double gravityAngleAux = global.gravityAngle;
     global.gravityAngle = 0;
@@ -202,7 +211,7 @@ int main(/*int argc, char *argv[]*/)
         global.bGamma = (nStepsRelax-1-i)/(nStepsRelax-1)*100000;
     }
     /*Tilt system and turn on vibration. Thermalization.
-     Define phase such that vibration starts smoothly from zero.*/
+      Define phase such that vibration starts smoothly from zero.*/
     global.phase = 2*M_PI*global.freq*global.time - asin(global.relInitDisp);
     global.gravityAngle = gravityAngleAux;
     global.vibrating = 1;
@@ -231,13 +240,18 @@ int main(/*int argc, char *argv[]*/)
         links3.sl_cl = links3.cl_op = links3.cl_sl = links3.cl_cl = 0;
     links3.lstkount = 0;
     /*------------------------------------------------------------------------*/
+
+#ifdef GRAPHICS
     relaxing = 0;
+#endif
+
     for (i = 0; i < nStepsRun; i++) {
 #ifdef GRAPHICS
         if (!(i % stepsForGraph)) {
             graphics(relaxing);
         }
 #endif
+
         if (!(i % stepsForWrite)) {
             write_results();
         }
@@ -252,15 +266,19 @@ int main(/*int argc, char *argv[]*/)
     free(particle); free_cell(); free(nStats);
     fclose(fFirst); fclose(fPhase); fclose(fLast);
     fclose(fLinkStat); fclose(fLinks); fclose(fEnergy);
+#ifdef COLLISIONS
+    fclose(fCollisions);
+#endif
     clock_time((int)iTime);
     return 0;
 }
 
 /******************************************************************************/
 
-long init_system() {
+long init_system()
 
 /******************************************************************************/
+{
     long nParticles = global.nParticles;
     double box_w = global.box_w;
     double box_h = global.box_h;
@@ -346,7 +364,7 @@ long init_system() {
 
     nParticles += nBottom;
     nStats = (neighbor_stats*)calloc((nParticles*nParticles-nParticles)/2 ,
-                             sizeof(neighbor_stats));
+                                     sizeof(neighbor_stats));
     for (i = 0; i < (nParticles*nParticles-nParticles)/2; i++) {
         nStats[i].touching = 0;
     }
@@ -360,10 +378,10 @@ long init_system() {
 
 /******************************************************************************/
 
-void step(long kstep) {
+void step(long kstep)
 
 /******************************************************************************/
-
+{
     long i = 0;
     long nParticles = global.nParticles;
 
@@ -418,31 +436,32 @@ void step(long kstep) {
 
 /******************************************************************************/
 
-void clock_time(int iTime) {
+void clock_time(int iTime)
 
 /******************************************************************************/
 /*
   Purpose:
 
-    CLOCK_TIME prints CPU and wall time of execution.
+  CLOCK_TIME prints CPU and wall time of execution.
 
   Discussion:
 
-    Prints CPU time and wall time in human readable format since a starting time
-    given as a parameter.
+  Prints CPU time and wall time in human readable format since a starting time
+  given as a parameter.
 
   Modified:
 
-    15 May 2014 by GGPM.
+  15 May 2014 by GGPM.
 
   Author:
 
-    Gonzalo G. Peraza Mues (GGPM)
+  Gonzalo G. Peraza Mues (GGPM)
 
   Parameters:
 
-    int iTime - Initial time.
+  int iTime - Initial time.
 */
+{
     int days, hours, minutes, seconds;
     int tTime = (int)time(NULL) - iTime;
     int t;
