@@ -26,6 +26,7 @@ void write_results();
 void phase_plot(FILE*);
 void write_3disk_avglinkstat();
 void search_collisions();
+void write_collision_stats();
 /******************************************************************************/
 
 void get_input()
@@ -259,6 +260,9 @@ int main(/*int argc, char *argv[]*/)
     if (global.nParticles == 3) {
         write_3disk_avglinkstat();
     }
+#ifdef COLLISIONS
+    write_collision_stats();
+#endif
 
     free(particle); free_cell(); free(nStats);
     fclose(fFirst); fclose(fPhase); fclose(fLast);

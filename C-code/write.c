@@ -12,6 +12,7 @@ void write_3disk_avglinkstat();
 void search_collisions();
 void write_collision(long, int, unsigned long);
 void save_collision_data(long, int);
+void collision_stats(long, int);
 
 void write_results() {
 
@@ -184,13 +185,11 @@ void search_collisions() {
             collisionN ++;
             i++;
             assert(i < 1000000);
-            if (global.runTime > 100) { //Just write 10% of the collisions.
-                if (gsl_rng_uniform_int(rgen, 10) == 1) {
-                    write_collision(i, colliding, collisionN);
-                }
-            } else {
+            save_collision_data(i, colliding);
+            if (global.runTime < 150) {
                 write_collision(i, colliding, collisionN);
             }
+            collision_stats(i, colliding);
             colliding = 0;
         } else {
             /*All other possibilities invalidate the collision.*/
@@ -250,8 +249,6 @@ void save_collision_data(long i, int colliding) {
 
 void write_collision(long i, int colliding, unsigned long collisionN) {
 
-    save_collision_data(i, colliding);
-
 #ifdef P_ALL_COLL
     int j = 0;
     FILE *fCollision;
@@ -303,4 +300,65 @@ void write_collision(long i, int colliding, unsigned long collisionN) {
             colliding);
     fflush(fCollisions);
 
+}
+
+double pL, pR; //Collision rates
+// Mean relative velocities
+double mGnLi, mGnRi, mGtLi, mGtRi;
+double mGnLf, mGnRf, mGtLf, mGtRf;
+// Mean absolute velocities
+double mVnLi, mVnRi, mVtLi, mVtRi, mWLi, mWRi, mVxLi, mVxRi, mVyLi, mVyRi;
+double mVnLf, mVnRf, mVtLf, mVtRf, mWLf, mWRf, mVxLf, mVxRf, mVyLf, mVyRf;
+void collision_stats(long i, int colliding) {
+    if (colliding == 1) {
+        pL += 1;
+        mGnLi += coll_data[0].gn;
+        mGtLi += coll_data[0].gt;
+        mVnLi += coll_data[0].vn0;
+        mVtLi += coll_data[0].vt0;
+        mWLi += coll_data[0].w;
+        mVxLi += coll_data[0].vx;
+        mVyLi += coll_data[0].vy;
+        mGnLf += coll_data[i].gn;
+        mGtLf += coll_data[i].gt;
+        mVnLf += coll_data[i].vn0;
+        mVtLf += coll_data[i].vt0;
+        mWLf += coll_data[i].w;
+        mVxLf += coll_data[i].vx;
+        mVyLf += coll_data[i].vy;
+    } else if (colliding == 2) {
+        pR += 1;
+        mGnRi += coll_data[0].gn;
+        mGtRi += coll_data[0].gt;
+        mVnRi += coll_data[0].vn0;
+        mVtRi += coll_data[0].vt0;
+        mWRi += coll_data[0].w;
+        mVxRi += coll_data[0].vx;
+        mVyRi += coll_data[0].vy;
+        mGnRf += coll_data[i].gn;
+        mGtRf += coll_data[i].gt;
+        mVnRf += coll_data[i].vn0;
+        mVtRf += coll_data[i].vt0;
+        mWRf += coll_data[i].w;
+        mVxRf += coll_data[i].vx;
+        mVyRf += coll_data[i].vy;
+    }
+
+}
+
+void write_collision_stats() {
+    FILE *fp;
+    fp = fopen("collision_stats.out", "w");
+    fprintf(fp, "%16.12e %16.12e %16.12e %16.12e %16.12e %16.12e %16.12e \
+                 %16.12e %16.12e %16.12e %16.12e %16.12e %16.12e %16.12e \
+                 %16.12e %16.12e %16.12e %16.12e %16.12e %16.12e %16.12e \
+                 %16.12e %16.12e %16.12e %16.12e %16.12e %16.12e %16.12e \
+                 %16.12e %16.12e\n",
+            pL, mGnLi/pL, mGtLi/pL, mVnLi/pL, mVtLi/pL, mWLi/pL, mVxLi/pL,
+            mVyLi/pL, mGnLf/pL, mGtLf/pL, mVnLf/pL, mVtLf/pL, mWLf/pL, mVxLf/pL,
+            mVyLf/pL,
+            pR, mGnRi/pR, mGtRi/pR, mVnRi/pR, mVtRi/pR, mWRi/pR, mVxRi/pR,
+            mVyRi/pR, mGnRf/pR, mGtRf/pR, mVnRf/pR, mVtRf/pR, mWRf/pR, mVxRf/pR,
+            mVyRf/pR);
+    fclose(fp);
 }
