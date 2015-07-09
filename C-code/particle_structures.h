@@ -73,6 +73,10 @@ typedef struct collision_temp_array
     double Fn; double Ft;
     double gn; double gt;
     double x; double y; double theta;
-    double vx; double vy; double w; double vt0;
-
+    double vx; double vy; double w; double vt0; double vn0;
+    double stretch;
+    double rx12n; double ry12n;
+    double xb; double yb;
+    double vyb;
+    double Ftg, Fng;
 } collision_temp_array;

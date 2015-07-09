@@ -96,10 +96,10 @@ void pair_force(long i, long j) {
         particle[j].fx -= -ry12n*tangentialForce;
         particle[j].fy -= rx12n*tangentialForce;
         /*Add torques*/
-        //particle[i].fw -= tangentialForce*r12*particle[i].radius/(radsum);
-        //particle[j].fw -= tangentialForce*r12*particle[j].radius/(radsum);
-        particle[i].fw -= tangentialForce*particle[i].radius;
-        particle[j].fw -= tangentialForce*particle[j].radius;
+        particle[i].fw -= tangentialForce*r12*particle[i].radius/(radsum);
+        particle[j].fw -= tangentialForce*r12*particle[j].radius/(radsum);
+        //particle[i].fw -= tangentialForce*particle[i].radius;
+        //particle[j].fw -= tangentialForce*particle[j].radius;
 
     } else {
         if (nStats[l].touching == 1) {

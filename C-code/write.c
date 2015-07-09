@@ -55,9 +55,6 @@ void write_results() {
     fflush(fEnergy);
     fflush(fLinkStat);
 
-#ifdef COLLISIONS
-    search_collisions();
-#endif
     return;
 }
 
@@ -174,14 +171,18 @@ void search_collisions() {
             save_collision_data(i, colliding);
         }
     } else { /*Already colliding.*/
-        if (touch1 == pretouch1 && touch2 == pretouch2) {
+        if (touch1 == pretouch1 && touch2 == pretouch2
+            && nStats[colliding-1].nForce > 0) {
             /*Collision continues.*/
             i++;
             save_collision_data(i, colliding);
-        } else if (!touch1 && !touch2) {
+        } else if (touch1 == pretouch1 && touch2 == pretouch2
+                   && nStats[colliding-1].nForce == 0) {
+            //} else if (!touch1 && !touch2) {
             /*Collision ends successfully.*/
             collisionN ++;
             i++;
+            assert(i < 1000000);
             write_collision(i, colliding, collisionN);
             colliding = 0;
         } else {
@@ -192,9 +193,9 @@ void search_collisions() {
 
 }
 
-collision_temp_array coll_data[100000];
+collision_temp_array coll_data[1000000];
 void save_collision_data(long i, int colliding) {
-    i = i % 100000; /*To prevent segmentation fault.*/
+    i = i % 1000000; /*To prevent segmentation fault.*/
 
     /*Calculate normal and tangential vectors*/
     double rx12 = particle[0].x0 - particle[colliding].x0;
@@ -211,9 +212,10 @@ void save_collision_data(long i, int colliding) {
     double vy12 = particle[0].y1 - particle[colliding].y1;
     double vn = rx12n*vx12 + ry12n*vy12;
     double vt = ry12n*vx12 - rx12n*vy12;
-    double gt = vt + particle[0].radius*particle[0].w1
-        - particle[colliding].radius*particle[colliding].w1;
+    double gt = vt + particle[0].radius*particle[0].w1;
+        //+ particle[colliding].radius*particle[colliding].w1;
     double vt0 = ry12n*particle[0].x1 - rx12n*particle[0].y1;
+    double vn0 = rx12n*particle[0].x1 + ry12n*particle[0].y1;
 
     /*Fill an array with valuable data.*/
     coll_data[i].time = global.time;
@@ -228,36 +230,70 @@ void save_collision_data(long i, int colliding) {
     coll_data[i].vy = particle[0].y1;
     coll_data[i].w = particle[0].w1;
     coll_data[i].vt0 = vt0;
+    coll_data[i].vn0 = vn0;
+    coll_data[i].stretch = nStats[colliding-1].stretch;
+    coll_data[i].rx12n =rx12n;
+    coll_data[i].ry12n =ry12n;
+    coll_data[i].xb = particle[colliding].x0;
+    coll_data[i].yb = particle[colliding].y0;
+    coll_data[i].vyb = particle[colliding].y1;
+    coll_data[i].Ftg = particle[0].fx*ry12n - particle[0].fy*rx12n;
+    coll_data[i].Fng = particle[0].fx*rx12n + particle[0].fy*ry12n;
 }
 
 void write_collision(long i, int colliding, unsigned long collisionN) {
-    FILE *fCollision;
-    char fname[50];
-    int j = 0;
 
     save_collision_data(i, colliding);
 
+#ifdef P_ALL_COLL
+    int j = 0;
+    FILE *fCollision;
+    char fname[50];
     sprintf(fname, "Collisions/collision_%ld.out", collisionN);
     fCollision = fopen(fname, "w");
     for (j = 0; j <= i; j++) {
-        fprintf(fCollision, "%e %e %e %e %e %e %e %e %e %e %e %e\n",
+        fprintf(fCollision, "%16.12e %16.12e %16.12e %16.12e %16.12e %16.12e \
+                             %16.12e %16.12e %16.12e %16.12e %16.12e %16.12e \
+                             %16.12e %16.12e %16.12e %16.12e %16.12e %16.12e \
+                             %16.12e %16.12e %16.12e\n",
                 coll_data[j].time - coll_data[0].time,
                 coll_data[j].Fn, coll_data[j].Ft,
                 coll_data[j].gn, coll_data[j].gt,
                 coll_data[j].x, coll_data[j].y, coll_data[j].theta,
                 coll_data[j].vx, coll_data[j].vy, coll_data[j].w,
-                coll_data[j].vt0);
+                coll_data[j].vt0,
+                coll_data[j].vn0,
+                coll_data[j].stretch,
+                coll_data[j].rx12n,
+                coll_data[j].ry12n,
+                coll_data[j].xb,
+                coll_data[j].yb,
+                coll_data[j].vyb,
+                coll_data[j].Ftg,
+                coll_data[j].Fng);
     }
     fclose(fCollision);
+#endif
 
-    /*0-colN   1-tc   2-dgn   3-dgt   4-dvt0   5-dvw0*/
-    fprintf(fCollisions,"%ld %e %e %e %e %e\n",
+    /*1-colN  2-tc  3-gn'  4-gn  5-gt'  6-gt
+      7-vt0'  8-vt0  9-vn0' 10-vn0  11-w0'  12-w0*/
+    fprintf(fCollisions,"%ld %16.12e %16.12e %16.12e %16.12e %16.12e %16.12e \
+                         %16.12e %16.12e %16.12e %16.12e %16.12e %16.12e \
+                         %16.12e %16.12e %16.12e %16.12e\n",
             collisionN,
-            coll_data[i].time - coll_data[0].time,
-            coll_data[i].gn - coll_data[0].gn,
-            coll_data[i].gt - coll_data[0].gt,
-            coll_data[i].vt0 - coll_data[0].vt0,
-            coll_data[i].w - coll_data[0].w);
+            coll_data[i].time- coll_data[0].time,
+            coll_data[i].gn, coll_data[0].gn,
+            coll_data[i].gt, coll_data[0].gt,
+            coll_data[i].vt0, coll_data[0].vt0,
+            coll_data[i].vn0, coll_data[0].vn0,
+            coll_data[i].w, coll_data[0].w,
+            fabs((coll_data[i].rx12n-coll_data[0].rx12n)/coll_data[0].rx12n),
+            fabs((coll_data[i].ry12n-coll_data[0].ry12n)/coll_data[0].ry12n),
+            coll_data[i].yb,
+            -global.gravity*(sin(global.gravityAngle)*coll_data[i].rx12n
+                             + cos(global.gravityAngle)*coll_data[i].ry12n),
+            -global.gravity*(sin(global.gravityAngle)*coll_data[i].ry12n
+                             - cos(global.gravityAngle)*coll_data[i].rx12n));
     fflush(fCollisions);
 
 }

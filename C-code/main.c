@@ -25,7 +25,7 @@ void clock_time(int);
 void write_results();
 void phase_plot(FILE*);
 void write_3disk_avglinkstat();
-
+void search_collisions();
 /******************************************************************************/
 
 void get_input()
@@ -74,6 +74,7 @@ void get_input()
             printf("Bulk gamma = %e. \n", global.bGamma);
         } else if (strcmp(type,"#timestep") == 0) {
             sscanf(value, "%lf", &global.timestep);
+            //global.timestep = auto_timestep(global.timestep);
             printf("Time step = %e s. \n", global.timestep);
         } else if (strcmp(type,"#relaxTime") == 0) {
             sscanf(value, "%lf", &global.relaxTime);
@@ -148,14 +149,6 @@ int main(/*int argc, char *argv[]*/)
 {
     /*First, print the version of the program used.*/
     printf("Version: %s\n", VERSION);
-
-    /*Make sure the time-step is at least 10-2 the duration of a
-      binary collision and at least 10-2 the duration of a tangential
-      oscillatory period. TODO*/
-    double meanMass =
-        diskParameters.meanR*diskParameters.meanR*M_PI*diskParameters.density;
-    double binaryT = sqrt(meanMass/diskParameters.kn);
-    //assert(global.timestep <= 0.01*binaryT);
 
     time_t iTime = time(NULL);
     get_input();
@@ -250,6 +243,10 @@ int main(/*int argc, char *argv[]*/)
         if (!(i % stepsForGraph)) {
             graphics(relaxing);
         }
+#endif
+
+#ifdef COLLISIONS
+        search_collisions();
 #endif
 
         if (!(i % stepsForWrite)) {
