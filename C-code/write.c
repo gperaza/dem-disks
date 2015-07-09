@@ -4,6 +4,7 @@ extern FILE *fPhase, *fFirst, *fLast, *fLinkStat, *fLinks, *fEnergy;
 extern FILE *fp;
 extern links_3disks links3;
 extern FILE *fCollisions;
+extern gsl_rng * rgen;
 
 void phase_plot(FILE*);
 void write_3disk_linkstat(FILE*);
@@ -183,7 +184,13 @@ void search_collisions() {
             collisionN ++;
             i++;
             assert(i < 1000000);
-            write_collision(i, colliding, collisionN);
+            if (global.runTime > 100) { //Just write 10% of the collisions.
+                if (gsl_rng_uniform_int(rgen, 10) == 1) {
+                    write_collision(i, colliding, collisionN);
+                }
+            } else {
+                write_collision(i, colliding, collisionN);
+            }
             colliding = 0;
         } else {
             /*All other possibilities invalidate the collision.*/
@@ -279,21 +286,21 @@ void write_collision(long i, int colliding, unsigned long collisionN) {
       7-vt0'  8-vt0  9-vn0' 10-vn0  11-w0'  12-w0*/
     fprintf(fCollisions,"%ld %16.12e %16.12e %16.12e %16.12e %16.12e %16.12e \
                          %16.12e %16.12e %16.12e %16.12e %16.12e %16.12e \
-                         %16.12e %16.12e %16.12e %16.12e\n",
+                         %16.12e %16.12e %16.12e %16.12e %d\n",
             collisionN,
-            coll_data[i].time- coll_data[0].time,
+            coll_data[i].time, coll_data[0].time,
             coll_data[i].gn, coll_data[0].gn,
             coll_data[i].gt, coll_data[0].gt,
             coll_data[i].vt0, coll_data[0].vt0,
             coll_data[i].vn0, coll_data[0].vn0,
             coll_data[i].w, coll_data[0].w,
-            fabs((coll_data[i].rx12n-coll_data[0].rx12n)/coll_data[0].rx12n),
-            fabs((coll_data[i].ry12n-coll_data[0].ry12n)/coll_data[0].ry12n),
+            coll_data[i].vyb,
             coll_data[i].yb,
             -global.gravity*(sin(global.gravityAngle)*coll_data[i].rx12n
                              + cos(global.gravityAngle)*coll_data[i].ry12n),
             -global.gravity*(sin(global.gravityAngle)*coll_data[i].ry12n
-                             - cos(global.gravityAngle)*coll_data[i].rx12n));
+                             - cos(global.gravityAngle)*coll_data[i].rx12n),
+            colliding);
     fflush(fCollisions);
 
 }
