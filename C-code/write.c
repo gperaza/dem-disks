@@ -302,7 +302,7 @@ void write_collision(long i, int colliding, unsigned long collisionN) {
 
 }
 
-double pL, pR; //Collision rates
+unsigned long pL, pR; //Collision rates
 // Mean relative velocities
 double mGnLi, mGnRi, mGtLi, mGtRi;
 double mGnLf, mGnRf, mGtLf, mGtRf;
@@ -349,9 +349,9 @@ void collision_stats(long i, int colliding) {
 void write_collision_stats() {
     FILE *fp;
     fp = fopen("collision_stats.out", "w");
-    fprintf(fp, "%16.12e %16.12e %16.12e %16.12e %16.12e %16.12e %16.12e \
+    fprintf(fp, "%ld %16.12e %16.12e %16.12e %16.12e %16.12e %16.12e \
                  %16.12e %16.12e %16.12e %16.12e %16.12e %16.12e %16.12e \
-                 %16.12e %16.12e %16.12e %16.12e %16.12e %16.12e %16.12e \
+                 %16.12e %ld %16.12e %16.12e %16.12e %16.12e %16.12e \
                  %16.12e %16.12e %16.12e %16.12e %16.12e %16.12e %16.12e \
                  %16.12e %16.12e\n",
             pL, mGnLi/pL, mGtLi/pL, mVnLi/pL, mVtLi/pL, mWLi/pL, mVxLi/pL,
