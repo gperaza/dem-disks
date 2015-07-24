@@ -157,6 +157,7 @@ void write_3disk_avglinkstat() {
     return;
 }
 
+unsigned long notCollisionN = 0;
 void search_collisions() {
     int touch1 = nStats[0].touching;
     int touch2 = nStats[1].touching;
@@ -189,14 +190,18 @@ void search_collisions() {
             if (global.runTime < 150) {
                 write_collision(i, colliding, collisionN);
             }
-            collision_stats(i, colliding);
+            if (global.runTime - global.time < 100) {
+                /*Take statistics form the last 100 seconds*/
+                collision_stats(i, colliding);}
             colliding = 0;
         } else {
             /*All other possibilities invalidate the collision.*/
             colliding = 0;
+            if (global.runTime - global.time < 100) {
+                notCollisionN ++;
+            }
         }
     }
-
 }
 
 collision_temp_array coll_data[1000000];
@@ -353,12 +358,13 @@ void write_collision_stats() {
                  "%16.12e %16.12e %16.12e %16.12e %16.12e %16.12e %16.12e "
                  "%16.12e %ld %16.12e %16.12e %16.12e %16.12e %16.12e "
                  "%16.12e %16.12e %16.12e %16.12e %16.12e %16.12e %16.12e "
-                 "%16.12e %16.12e\n",
+                 "%16.12e %16.12e %ld\n",
             pL, mGnLi/pL, mGtLi/pL, mVnLi/pL, mVtLi/pL, mWLi/pL, mVxLi/pL,
             mVyLi/pL, mGnLf/pL, mGtLf/pL, mVnLf/pL, mVtLf/pL, mWLf/pL, mVxLf/pL,
             mVyLf/pL,
             pR, mGnRi/pR, mGtRi/pR, mVnRi/pR, mVtRi/pR, mWRi/pR, mVxRi/pR,
             mVyRi/pR, mGnRf/pR, mGtRf/pR, mVnRf/pR, mVtRf/pR, mWRf/pR, mVxRf/pR,
-            mVyRf/pR);
+            mVyRf/pR,
+            notCollisionN);
     fclose(fp);
 }

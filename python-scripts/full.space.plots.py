@@ -13,8 +13,8 @@ def main():
 
     iTime = 9
     fTime = 10
-    p3d.plot_compare_y(show=False, iTime=iTime, fTime=fTime)
-    p3d.plot_center_path(iTime=iTime, fTime=fTime, show=False)
+    #p3d.plot_compare_y(show=False, iTime=iTime, fTime=fTime)
+    p3d.plot_center_path(iTime=iTime, fTime=fTime, show=True)
     #p3d.plot_compare_supperpose(show=False, iTime=iTime, fTime=fTime)
     #p3d.plot_compare_links(show=False, iTime=iTime, fTime=fTime)
 

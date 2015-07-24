@@ -162,6 +162,7 @@ int main(/*int argc, char *argv[]*/)
     long stepsForGraph = (long)(global.timeForGraph/timestep);
 #endif
     long stepsForWrite = (long)(global.timeForWrite/timestep);
+    long stepsForWrite2 = (long)(1e-4/timestep); //To record last second
     global.time = -timestep*nStepsRelax - timestep*nStepsThermal;
 
     /*Set up constants for the gear integrator.*/
@@ -250,7 +251,8 @@ int main(/*int argc, char *argv[]*/)
         search_collisions();
 #endif
 
-        if (!(i % stepsForWrite)) {
+        if (!(i % stepsForWrite) ||  // Improve resolution for the last second.
+            ((global.runTime - global.time < 1) && !(i % stepsForWrite2))) {
             write_results();
         }
         step(i);
@@ -260,6 +262,7 @@ int main(/*int argc, char *argv[]*/)
     if (global.nParticles == 3) {
         write_3disk_avglinkstat();
     }
+
 #ifdef COLLISIONS
     write_collision_stats();
 #endif
@@ -267,9 +270,11 @@ int main(/*int argc, char *argv[]*/)
     free(particle); free_cell(); free(nStats);
     fclose(fFirst); fclose(fPhase); fclose(fLast);
     fclose(fLinkStat); fclose(fLinks); fclose(fEnergy);
+
 #ifdef COLLISIONS
     fclose(fCollisions);
 #endif
+
     clock_time((int)iTime);
     return 0;
 }
