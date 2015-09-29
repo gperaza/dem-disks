@@ -5,3 +5,5 @@ disks
 Test/
 /python-scripts/Deprecated/
 /python-scripts/plots_3disks_lib.pyc
+/python-scripts/__pycache__/
+
