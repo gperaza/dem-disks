@@ -36,6 +36,9 @@ void bulk_force(long i, double cga, double sga) {
     double gravity = global.gravity;
     double bGamma = global.bGamma;
 
+    /*A positive gravity angle tilts the system counter clockwise,
+      i.e.  in this reference frame the gravity vector rotates
+      clockwise.*/
     particle[i].fx += -particle[i].mass*gravity*sga;
     particle[i].fy += -particle[i].mass*gravity*cga;
 

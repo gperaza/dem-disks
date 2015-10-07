@@ -8,7 +8,7 @@
 
 void color_background(cairo_t*, int, double, double);
 void draw_particles(cairo_t*, long, double, double);
-void draw_links(cairo_t*);
+void draw_links(cairo_t*, long);
 void draw_box(cairo_t*, double, double);
 void draw_data(cairo_t*, double, double, double);
 void draw_disk(cairo_t*, long, double, double, double, double, int);
@@ -43,7 +43,7 @@ void graphics(int relaxing) {
     draw_data(cr, box_w, box_h, time);
     color_background(cr, relaxing, box_w, box_h);
     draw_particles(cr, nParticles, box_w, box_h);
-    //draw_links(cr);
+    draw_links(cr, nParticles);
     draw_box(cr, box_w, box_h);
 
     cairo_destroy(cr);
@@ -158,7 +158,7 @@ void draw_data(cairo_t *cr, double box_w, double box_h, double time) {
     double arrow_x = box_w + (1-SHRINK)/4*box_w/SHRINK;
     double arrow_y =  -(1-SHRINK)/4*box_h/SHRINK;
     double arrow_r =  fmin((1-SHRINK)/4*box_w/SHRINK, -arrow_y)*0.95;
-    double arrow_angle = -M_PI/2+global.gravityAngle;
+    double arrow_angle = -M_PI/2-global.gravityAngle;
     double head_angle = M_PI/3.5 + M_PI - arrow_angle;
     double head_angle2 = -M_PI/3.5 + 2*M_PI - arrow_angle;
     double head_r = arrow_r*0.25;
@@ -186,4 +186,34 @@ void draw_data(cairo_t *cr, double box_w, double box_h, double time) {
     cairo_new_path(cr);
 
     return;
+}
+
+void draw_links(cairo_t *cr, long nParticles) {
+    long i, j;
+    for (i = 0; i < nParticles; i++) {
+        for (j = i + 1; i < nParticles; i++){
+            if (particle[i].type + particle[j].type <= 1) {
+                cairo_set_source_rgb(cr, 1.0, 0.0, 0.0);
+                cairo_move_to(cr, particle[i].x0, particle[i].y0);
+                cairo_line_to(cr, particle[j].x0, particle[j].y0);
+                cairo_stroke(cr);
+            } else if (particle[i].type + particle[j].type == 2) {
+                /* Wall index > disk index. Find the closest point on
+                   the line (p1x,p1y)-(p2x,p2y) using the projected
+                   length and subtract.*/
+                double lDx = particle[j].p2x - particle[j].p1x;
+                double lDy = particle[j].p2y - particle[j].p1y;
+                double lenLineSqrd = lDx*lDx + lDy*lDy;
+                double proy = ((particle[i].x0 - particle[j].p1x)*lDx +
+                               (particle[i].y0 - particle[j].p1y)*lDy)
+                    / (lenLineSqrd);
+                double p2x = particle[j].p1x + proy*(lDx);
+                double p2y = particle[j].p1y + proy*(lDy);
+                cairo_set_source_rgb(cr, 1.0, 0.0, 0.0);
+                cairo_move_to(cr, particle[i].x0, particle[i].y0);
+                cairo_line_to(cr, p2x, p2y);
+                cairo_stroke(cr);
+            }
+        }
+    }
 }
