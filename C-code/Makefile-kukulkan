@@ -5,8 +5,8 @@ CFLAGS += -DCOLLISIONS
 CFLAGS += -DP_ALL_COLL
 #CFLAGS += -DGRAPHICS
 #GRAPHLIBS = $(shell pkg-config --libs cairo)
-LIBS = -lm -lgsl -lgslcblas
-#LIBS = ~/lib/libm.a ~/lib/libgsl.a ~/lib/libgslcblas.a
+#LIBS = -lm -lgsl -lgslcblas
+LIBS = ~/lib/libm.a ~/lib/libgsl.a ~/lib/libgslcblas.a
 CC = gcc
 
 HDRS = common.h particle_structures.h
