@@ -282,7 +282,7 @@ int main(/*int argc, char *argv[]*/)
     write_collision_stats();
 #endif
 
-    free(particle); free_cell(); free(nStats);
+    free(particle); free(nStats);
     fclose(fFirst); fclose(fPhase); fclose(fLast);
     fclose(fLinkStat); fclose(fLinks); fclose(fEnergy);
 

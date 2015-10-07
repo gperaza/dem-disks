@@ -74,6 +74,11 @@ void pair_force(long i, long j) {
         double lenLineSqrd = lDx*lDx + lDy*lDy;
         double proy = ((particle[i].x0 - particle[j].p1x)*lDx +
                        (particle[i].y0 - particle[j].p1y)*lDy) / (lenLineSqrd);
+        /*For walls x0, y0 stores the coordinates of the last contact
+          point. Used in collision statistics for one disk on wedge.
+        */
+        particle[j].x0 = (particle[j].p1x + proy*(lDx));
+        particle[j].y0 = (particle[j].p1y + proy*(lDy));
         rx12 = particle[i].x0 - (particle[j].p1x + proy*(lDx));
         ry12 = particle[i].y0 - (particle[j].p1y + proy*(lDy));
         radsum = particle[i].radius;

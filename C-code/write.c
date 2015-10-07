@@ -159,7 +159,6 @@ void write_3disk_avglinkstat() {
 
 unsigned long notCollisionN = 0;
 void search_collisions() {
-    if (global.wedge == 1) return;
 
     int touch1 = nStats[0].touching;
     int touch2 = nStats[1].touching;

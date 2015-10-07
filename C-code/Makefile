@@ -10,7 +10,7 @@ LIBS = -lm -lgsl -lgslcblas
 CC = gcc
 
 HDRS = common.h particle_structures.h
-OBJS = main.o graphics.o integrator.o forces.o linkcell.o write.o
+OBJS = main.o graphics.o integrator.o forces.o write.o
 
 default:$(OBJS)
 	$(CC)  $(CFLAGS) $(OBJS) $(GRAPHLIBS) $(LIBS) -o ../disks
@@ -23,5 +23,4 @@ main.o:		Makefile $(HDRS)
 integrator.o:	Makefile $(HDRS)
 forces.o:	Makefile $(HDRS)
 graphics.o:	Makefile $(HDRS)
-linkcell.o:	Makefile $(HDRS)
 write.o:	Makefile $(HDRS)

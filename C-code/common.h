@@ -24,9 +24,6 @@ void make_forces();
 void graphics(int);
 void boundary_conditions(disk*, int, long);
 void boundary_conditions_walls(long);
-void make_forces_linked_cell();
-void init_cell();
 void bulk_force(long, double, double);
 void pair_force(long, long);
-void free_cell();
 #endif
