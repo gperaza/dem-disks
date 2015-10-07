@@ -165,3 +165,33 @@ void boundary_conditions(disk *particle, int b_cond, long kstep) {
     }
     return;
 }
+
+void boundary_conditions_walls(long i) {
+    double freq = global.freq;
+    double time = global.time;
+    double phase = global.phase;
+    double Dy = global.epsilon*sin(2*M_PI*freq*time - phase);
+    double Dx = 0;
+
+    switch (global.bCondType) {
+    case 1:
+        /*Sinusoidal displacement*/
+        if (global.vibrating) {
+            particle[i].p1x = particle[i].p1x0 + Dx;
+            particle[i].p1y = particle[i].p1y0 + Dy;
+            particle[i].p2x = particle[i].p2x0 + Dx;
+            particle[i].p2y = particle[i].p2y0 + Dy;
+
+            particle[i].y1 = global.epsilon*
+                2*M_PI*freq*cos(2*M_PI*freq*time - phase);
+            particle[i].x1 = 0;
+        }
+        break;
+    default:
+        /*Free relaxation*/
+        printf("No excitation implemented\n");
+        exit(0);
+        break;
+    }
+    return;
+}

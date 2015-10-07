@@ -15,6 +15,13 @@ typedef struct disk
     int rotFixed;
     /*Initial positions of disks (useful for vibrating)*/
     double xi; double yi; double wi;
+
+    /* Parameters for a line defined by two points.*/
+    double p1x, p1y, p2x, p2y;
+    double p1x0, p1y0, p2x0, p2y0;
+    /* Since lines do not rotate, it is useful to store their normal
+       and tangential versors. */
+    double normX, normY, tangX, tangY;
 } disk;
 
 typedef struct particleParameters
@@ -44,6 +51,7 @@ typedef struct systemParameters
     double a[5];
     double c[6];
     int bCondType;
+    int wedge;
 
     unsigned long linkCount, slidingLinks, changingLinks;
     double meanLinkSat, meanSqLinkSat;

@@ -1,6 +1,6 @@
 #include "common.h"
-#include <cairo.h>
-#include <cairo-svg.h>
+#include <cairo/cairo.h>
+#include <cairo/cairo-svg.h>
 
 #define DSP_W 1000
 #define DSP_H ((int)(DSP_W*(box_h/box_w)))
@@ -12,6 +12,7 @@ void draw_links(cairo_t*);
 void draw_box(cairo_t*, double, double);
 void draw_data(cairo_t*, double, double, double);
 void draw_disk(cairo_t*, long, double, double, double, double, int);
+void draw_line(cairo_t*, double, double, double, double);
 
 void graphics(int relaxing) {
     double box_w = global.box_w;
@@ -57,14 +58,18 @@ void draw_particles(cairo_t *cr, long nParticles, double box_w,
 
     cairo_set_line_width(cr,fmin(box_w, box_h)/800);
     for (i = 0; i < nParticles; i++) {
-        draw_disk(cr, i, particle[i].x0, particle[i].y0,
-                  particle[i].radius, particle[i].w0, particle[i].type);
-        draw_disk(cr, i, particle[i].x0 + box_w, particle[i].y0,
-                  particle[i].radius, particle[i].w0, particle[i].type);
-        draw_disk(cr, i, particle[i].x0 - box_w, particle[i].y0,
-                  particle[i].radius, particle[i].w0, particle[i].type);
+        if (particle[i].type == 0 || particle[i].type == 1) {
+            draw_disk(cr, i, particle[i].x0, particle[i].y0,
+                      particle[i].radius, particle[i].w0, particle[i].type);
+            draw_disk(cr, i, particle[i].x0 + box_w, particle[i].y0,
+                      particle[i].radius, particle[i].w0, particle[i].type);
+            draw_disk(cr, i, particle[i].x0 - box_w, particle[i].y0,
+                      particle[i].radius, particle[i].w0, particle[i].type);
+        } else if (particle[i].type == 2) {
+            draw_line(cr, particle[i].p1x, particle[i].p1y,
+                      particle[i].p2x, particle[i].p2y);
+        }
     }
-
     return;
 }
 
@@ -109,6 +114,19 @@ void draw_disk(cairo_t *cr, long id, double x, double y, double r,
     cairo_move_to(cr, x, y);
     cairo_show_text(cr, label);
     cairo_new_path(cr);
+
+    return;
+}
+
+void draw_line(cairo_t *cr, double p1x, double p1y, double p2x, double p2y) {
+    double box_h = global.box_h;
+    double m = (p2y - p1y)/(p2x - p1x);
+    double b = p1y - m*p1x;
+
+    cairo_set_source_rgb(cr, 0.0, 0.0, 0.0);
+    cairo_move_to(cr, -b/m, 0);
+    cairo_line_to(cr, (box_h - b)/m, box_h);
+    cairo_stroke(cr);
 
     return;
 }

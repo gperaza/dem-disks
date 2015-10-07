@@ -27,6 +27,8 @@ void phase_plot(FILE*);
 void write_3disk_avglinkstat();
 void search_collisions();
 void write_collision_stats();
+long init_system();
+void init_system_wedge();
 /******************************************************************************/
 
 void get_input()
@@ -36,7 +38,7 @@ void get_input()
     char input[200];
     char type[200];
     char value[200];
-    int inputs = 23, countInputs = 0;
+    int inputs = 24, countInputs = 0;
 
     if ( (fp = fopen("input_file", "r")) == NULL ) {
         printf("Error opening input file.\n");
@@ -117,6 +119,10 @@ void get_input()
             sscanf(value, "%lf", &global.relInitDisp);
             printf("Relative initial displacement for bottom (-1,1) = %lf. \n",
                    global.relInitDisp);
+        } else if (strcmp(type,"#wedge") == 0) {
+            sscanf(value, "%d", &global.wedge);
+            printf("Simulating a wedge? = %d. \n",
+                   global.wedge);
         } else {
             printf("Unknown parameter.\n");
             exit(1);
@@ -178,9 +184,16 @@ int main(/*int argc, char *argv[]*/)
     fCollisions = fopen("collisions.out", "w");
 #endif
 
-    /*Initialize the packing and make nParticles include walls.*/
+    /*Initialize the packing and make nParticles include walls, we
+      now consider a wedge as a special case when nParticles == 1.*/
     printf("Simulating for %ld particles.\n", global.nParticles);
-    global.nParticles = init_system();
+    if (global.wedge == 1) {
+        global.nParticles = 3;
+        init_system_wedge();
+        printf("Simulating a wedge.\n");
+    } else {
+        global.nParticles = init_system();
+    }
     printf("Number of particles including walls: %ld.\n", global.nParticles);
 
     /*Initialize linked cells*/
@@ -298,14 +311,13 @@ long init_system()
     double sumWidth = 0;
     double wallR = meanR;
     long nBottom = (long)ceil(box_w/(2*wallR));
-    long nDisks = nParticles;
     double sigma = meanR*0.25;
     disk tempParticle;
 
     rgen = gsl_rng_alloc(gsl_rng_mt19937);
     gsl_rng_set(rgen, seed);
 
-    assert(nDisks > 0);
+    assert(nParticles > 0);
     assert(nBottom > 0);
 
     particle = (disk*)calloc(nParticles + nBottom, sizeof(disk));
@@ -330,7 +342,7 @@ long init_system()
 
     /*Setup mobile particles. Type = 0 for mobile disk.*/
     /*Considering 3 different radius around a mean.*/
-    for (i = 0; i < nDisks; i++) {
+    for (i = 0; i < nParticles; i++) {
         particle[i].type = 0;
         if (i < (long)(nParticles/3))
             particle[i].radius = meanR - sigma;
@@ -384,6 +396,59 @@ long init_system()
 
 /******************************************************************************/
 
+void init_system_wedge()
+
+/******************************************************************************/
+{
+    double meanR = diskParameters.meanR;
+    double density = diskParameters.density;
+    long i;
+    double wedgeAngle = M_PI/6;
+
+    particle = (disk*)calloc(3, sizeof(disk));
+
+    /*Setup the walls. Type = 2 for straight walls.*/
+    for (i = 1; i < 3; i++) {
+        particle[i].type = 2;
+        double m = pow(-1, i)*tan(wedgeAngle);
+        double b = -m*global.box_w/2;
+        particle[i].p1x = 0;
+        particle[i].p1y = b;
+        particle[i].p2x = 1;
+        particle[i].p2y = m+b;
+        /*Store initial positions for boundary conditions*/
+        particle[i].p1x0 = particle[i].p1x;
+        particle[i].p1y0 = particle[i].p1y;
+        particle[i].p2x0 = particle[i].p2x;
+        particle[i].p2y0 = particle[i].p2y;
+        /*Set initial displacement of bottom*/
+        particle[i].p1y += global.epsilon*global.relInitDisp;
+        particle[i].p2y += global.epsilon*global.relInitDisp;
+    }
+
+    /*Setup mobile particle. Type = 0 for mobile disk.*/
+    particle[0].type = 0;
+    particle[0].radius = meanR;
+    particle[0].mass = density*particle[0].radius*particle[0].radius*M_PI;
+    particle[0].iMoment =
+        particle[0].mass*particle[0].radius*particle[0].radius/2;
+    particle[0].x0 = global.box_w/2;
+    particle[0].y0 = particle[0].radius*2;
+
+    nStats = (neighbor_stats*)calloc(3, sizeof(neighbor_stats));
+    for (i = 0; i < 3; i++) {
+        nStats[i].touching = 0;
+    }
+
+    /*Restart RNG for simulation.*/
+    rgen = gsl_rng_alloc(gsl_rng_mt19937);
+    gsl_rng_set(rgen, global.seed);
+
+    return;
+}
+
+/******************************************************************************/
+
 void step(long kstep)
 
 /******************************************************************************/
@@ -404,6 +469,7 @@ void step(long kstep)
         }
         if (particle[i].type == 1) boundary_conditions(&particle[i],
                                                        global.bCondType, kstep);
+        if (particle[i].type == 2) boundary_conditions_walls(i);
     }
     make_forces();
     //make_forces_linked_cell();
