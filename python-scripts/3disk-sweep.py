@@ -38,7 +38,7 @@ def write_input_file(ac, tilt, dirname):
 
 def run_simulation((ac, tilt)):
     reRun = False
-    execPath = "/home/moukarzel/DEM-source/disks"
+    execPath = "/home/moukarzel/dem-code/disks"
     dirname = "tilt."+tilt+".ac."+ac
     if os.path.isdir(dirname):
         if not reRun:
