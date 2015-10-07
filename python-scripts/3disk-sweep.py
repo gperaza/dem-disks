@@ -32,6 +32,7 @@ def write_input_file(ac, tilt, dirname):
 #mu               0.1      (friction coefficient)
 #vGamma           150      (viscoelastic dissipation)
 #bCondType        1        (1: sinusoidal 2:random vib)
+#relInitDisp      1        (between 1 and -1)
 #wedge            1
 """)
 
