@@ -62,7 +62,8 @@ void pair_force(long i, long j) {
         rx12 = particle[i].x0 - particle[j].x0;
         ry12 = particle[i].y0 - particle[j].y0;
         radsum = particle[i].radius + particle[j].radius;
-    } else if (particle[i].type + particle[j].type == 2) {
+    } else {
+        assert(particle[i].type + particle[j].type == 2);
         /* Wall index > disk index. Find the closest point on the
          line (p1x,p1y)-(p2x,p2y) using the projected length and subtract.*/
         double lDx = particle[j].p2x - particle[j].p1x;
@@ -109,8 +110,8 @@ void pair_force(long i, long j) {
         particle[j].fx -= ry12n*tangentialForce;
         particle[j].fy -= -rx12n*tangentialForce;
         /*Add torques*/
-        particle[i].fw = tangentialForce*r12*particle[i].radius/(radsum);
-        particle[j].fw = tangentialForce*r12*particle[j].radius/(radsum);
+        particle[i].fw += tangentialForce*r12*particle[i].radius/(radsum);
+        particle[j].fw += tangentialForce*r12*particle[j].radius/(radsum);
         //particle[i].fw = tangentialForce*particle[i].radius;
         //particle[j].fw = tangentialForce*particle[j].radius;
 
@@ -174,7 +175,8 @@ double tangential_force_disk_disk(double normalForce, long i,
         ss = particle[i].w0*particle[i].radius
             + particle[j].w0*particle[j].radius
             - atan2(ry12, rx12)*radsum;
-    } else if (particle[i].type + particle[j].type == 2) {
+    } else {
+        assert(particle[i].type + particle[j].type == 2);
         /*The tangent versor (tv) is (ry12n, -rx12n).*/
         /*Tangential displacement is calculated as
           R1w01 + (vec(ri) - vec(p1)) dot tversor.*/
