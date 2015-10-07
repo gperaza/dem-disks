@@ -4,9 +4,7 @@ import itertools
 import multiprocessing
 
 '''This script lunches a sweep of simulations exploring the behavior
-of the 3 disk setup. The script relies on the C program disks to run
-the simulations. The script contains some functions to analyze data
-obtained from this simulations'''
+of the 3 disk setup.'''
 
 
 def write_input_file(ac, tilt, dirname):
@@ -21,11 +19,11 @@ def write_input_file(ac, tilt, dirname):
 #gravityAngle     """+tilt+"""      (in fractions of PI)
 #bGamma           0        (bulk dissipation)
 #timestep         1e-6     (in s, timestep for integrator)
-#relaxTime        5        (in s, time for relaxation)
-#thermalTime      5
-#runTime          5        (in s, time for simulation)
+#relaxTime        10       (in s, time for relaxation)
+#thermalTime      100
+#runTime          1000     (in s, time for simulation)
 #timeForGraph     1e0      (in s, time between graphics)
-#timeForWrite     1e-6     (in s, time between writes)
+#timeForWrite     1e0      (in s, time between writes)
 #meanR            0.02     (in m, mean disk radius)
 #density          3.57     (density of the material)
 #kn               4.5e6    (normal elastic constant)
@@ -65,17 +63,17 @@ def main():
     os.chdir("3diskSimSweep")
 
     # List of acceleration amplitudes
-    # acList = ["%06.4f"%x for x in np.arange(0, 1.25, 0.005)]
-    acList = ["1.0000"]
+    acList1 = ["1.0000"]
+    acList2 = ["%06.4f"%x for x in np.arange(0, 1.25, 0.005)]
 
     # List of tilt angles.
-    # tiltList = ["%05.3f"%x for x in np.arange(0, 0.166, 0.001)]
-    # tiltList = ["%05.3f"%x for x in np.arange(0, 0.071, 0.001)]
-    tiltList = ["0.000"]
+    tiltList1 = ["0.000"]
+    tiltList2 = ["%05.3f"%x for x in np.arange(0, 0.166, 0.001)]
+    tiltList3 = ["%05.3f"%x for x in np.arange(0, 0.071, 0.001)]
 
     pool_size = 16
     pool = multiprocessing.Pool(processes=pool_size)
-    pool.map(run_simulation, itertools.product(acList, tiltList))
+    pool.map(run_simulation, itertools.product(acList1, tiltList1))
     pool.close()  # no more tasks
     pool.join()  # wrap up current tasks
     os.chdir("..")
