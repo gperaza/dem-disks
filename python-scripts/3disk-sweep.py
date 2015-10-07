@@ -66,16 +66,18 @@ def main():
 
     # List of acceleration amplitudes
     acList1 = ["1.0000"]
-    acList2 = ["%06.4f"%x for x in np.arange(0, 1.25, 0.005)]
+    acList2 = ["%06.4f"%x for x in np.arange(0, 1.25, 0.05)]
+    acList3 = ["%06.4f"%x for x in np.arange(0, 1.25, 0.005)]
 
     # List of tilt angles.
     tiltList1 = ["0.000"]
-    tiltList2 = ["%05.3f"%x for x in np.arange(0, 0.166, 0.001)]
-    tiltList3 = ["%05.3f"%x for x in np.arange(0, 0.071, 0.001)]
+    tiltList2 = ["%05.3f"%x for x in np.arange(0, 0.166, 0.01)]
+    tiltList3 = ["%05.3f"%x for x in np.arange(0, 0.166, 0.001)]
+    tiltList4 = ["%05.3f"%x for x in np.arange(0, 0.071, 0.001)]
 
     pool_size = 16
     pool = multiprocessing.Pool(processes=pool_size)
-    pool.map(run_simulation, itertools.product(acList2, tiltList2))
+    pool.map(run_simulation, itertools.product(acList2, tiltList3))
     pool.close()  # no more tasks
     pool.join()  # wrap up current tasks
     os.chdir("..")
