@@ -476,7 +476,6 @@ void step(long kstep)
         if (particle[i].type == 2) boundary_conditions_walls(i);
     }
     make_forces();
-    //make_forces_linked_cell();
     for (i = 0; i < nParticles; i++) {
         if (particle[i].type == 0) {
             if (particle[i].posFixed == 0) corrector_positions(&particle[i]);

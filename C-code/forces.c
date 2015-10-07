@@ -65,7 +65,8 @@ void pair_force(long i, long j) {
         rx12 = particle[i].x0 - particle[j].x0;
         ry12 = particle[i].y0 - particle[j].y0;
         radsum = particle[i].radius + particle[j].radius;
-    } else if (particle[i].type + particle[j].type == 2) {
+    } else if (particle[i].type + particle[j].type == 2
+               && particle[i].type != 1) {
         /* Wall index > disk index. Find the closest point on the
          line (p1x,p1y)-(p2x,p2y) using the projected length and subtract.*/
         double lDx = particle[j].p2x - particle[j].p1x;

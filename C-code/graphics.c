@@ -43,8 +43,8 @@ void graphics(int relaxing) {
     draw_data(cr, box_w, box_h, time);
     color_background(cr, relaxing, box_w, box_h);
     draw_particles(cr, nParticles, box_w, box_h);
-    draw_links(cr, nParticles);
     draw_box(cr, box_w, box_h);
+    draw_links(cr, nParticles);
 
     cairo_destroy(cr);
     cairo_surface_destroy(surface);
@@ -190,14 +190,18 @@ void draw_data(cairo_t *cr, double box_w, double box_h, double time) {
 
 void draw_links(cairo_t *cr, long nParticles) {
     long i, j;
+
     for (i = 0; i < nParticles; i++) {
-        for (j = i + 1; i < nParticles; i++){
+        for (j = i + 1; j < nParticles; j++) {
+            long l = i*global.nParticles + (j-1) - i*(i+3)/2;
+            if (nStats[l].touching == 0) continue;
             if (particle[i].type + particle[j].type <= 1) {
                 cairo_set_source_rgb(cr, 1.0, 0.0, 0.0);
                 cairo_move_to(cr, particle[i].x0, particle[i].y0);
                 cairo_line_to(cr, particle[j].x0, particle[j].y0);
                 cairo_stroke(cr);
-            } else if (particle[i].type + particle[j].type == 2) {
+            } else if (particle[i].type + particle[j].type == 2
+                       && particle[i].type != 1) {
                 /* Wall index > disk index. Find the closest point on
                    the line (p1x,p1y)-(p2x,p2y) using the projected
                    length and subtract.*/
