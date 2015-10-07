@@ -2,6 +2,7 @@ import os
 import subprocess
 import itertools
 import multiprocessing
+import numpy as np
 
 '''This script lunches a sweep of simulations exploring the behavior
 of the 3 disk setup.'''
