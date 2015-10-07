@@ -158,6 +158,10 @@ int main(/*int argc, char *argv[]*/)
     printf("Version: %s\n", VERSION);
 
     time_t iTime = time(NULL);
+    /*Clean up.*/
+    if (system("rm *.svg")) printf("No *.svg to delete.\n");
+    if (system("rm *.out")) printf("No *.out to delete.\n");
+
     get_input();
 
     double timestep = global.timestep;
