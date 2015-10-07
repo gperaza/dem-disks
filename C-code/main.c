@@ -200,8 +200,6 @@ int main(/*int argc, char *argv[]*/)
     }
     printf("Number of particles including walls: %ld.\n", global.nParticles);
 
-    /*Initialize linked cells*/
-    init_cell();
     /*------------------------------------------------------------------------*/
 #ifdef GRAPHICS
     int relaxing = 1;
@@ -409,6 +407,8 @@ void init_system_wedge()
     long i;
     double wedgeAngle = M_PI/6;
 
+    global.box_w = 3*2*diskParameters.meanR;
+    global.box_h = 3*2*diskParameters.meanR;
     particle = (disk*)calloc(3, sizeof(disk));
 
     /*Setup the walls. Type = 2 for straight walls.*/
