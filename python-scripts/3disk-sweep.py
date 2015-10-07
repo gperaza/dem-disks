@@ -75,7 +75,7 @@ def main():
 
     pool_size = 16
     pool = multiprocessing.Pool(processes=pool_size)
-    pool.map(run_simulation, itertools.product(acList1, tiltList1))
+    pool.map(run_simulation, itertools.product(acList2, tiltList2))
     pool.close()  # no more tasks
     pool.join()  # wrap up current tasks
     os.chdir("..")
