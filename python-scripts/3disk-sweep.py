@@ -25,7 +25,7 @@ def write_input_file(ac, tilt, dirname):
 #runTime              1000     (in s, time for simulation)
 #timeForGraph         1e0      (in s, time between graphics)
 #timeForWriteRun      1e0      (in s, time between writes)
-#timeForWriteThermal  1e0      (in s, time between writes)
+#timeForWriteThermal  1e9      (in s, time between writes)
 #meanR                0.02     (in m, mean disk radius)
 #density              3.57     (density of the material)
 #kn                   4.5e6    (normal elastic constant)
