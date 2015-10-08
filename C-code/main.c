@@ -38,7 +38,7 @@ void get_input()
     char input[200];
     char type[200];
     char value[200];
-    int inputs = 24, countInputs = 0;
+    int inputs = 25, countInputs = 0;
 
     if ( (fp = fopen("input_file", "r")) == NULL ) {
         printf("Error opening input file.\n");

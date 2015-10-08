@@ -10,30 +10,31 @@ of the 3 disk setup.'''
 
 def write_input_file(ac, tilt, dirname):
     f = open(dirname + "/input_file", "w")
-    f.write("""#nParticles       1
-#seed             123456   (seed for random generator)
-#box_w            2        (in disk units)
-#box_h            3        (in disk units)
-#freq             80       (in Hz, for bottom movement)
-#dimensionlessAc  """+ac+"""      (dimensionless acceleration of bottom)
-#gravity          9.81     (m/s)
-#gravityAngle     """+tilt+"""      (in fractions of PI)
-#bGamma           0        (bulk dissipation)
-#timestep         1e-6     (in s, timestep for integrator)
-#relaxTime        10       (in s, time for relaxation)
-#thermalTime      100
-#runTime          1000     (in s, time for simulation)
-#timeForGraph     1e0      (in s, time between graphics)
-#timeForWrite     1e0      (in s, time between writes)
-#meanR            0.02     (in m, mean disk radius)
-#density          3.57     (density of the material)
-#kn               4.5e6    (normal elastic constant)
-#pr               0.37     (poisson ratio of the material)
-#mu               0.1      (friction coefficient)
-#vGamma           150      (viscoelastic dissipation)
-#bCondType        1        (1: sinusoidal 2:random vib)
-#relInitDisp      1        (between 1 and -1)
-#wedge            1
+    f.write("""#nParticles           1
+#seed                 123456   (seed for random generator)
+#box_w                2        (in disk units)
+#box_h                3        (in disk units)
+#freq                 80       (in Hz, for bottom movement)
+#dimensionlessAc      """+ac+"""      (dimensionless acceleration of bottom)
+#gravity              9.81     (m/s)
+#gravityAngle         """+tilt+"""      (in fractions of PI)
+#bGamma               0        (bulk dissipation)
+#timestep             1e-6     (in s, timestep for integrator)
+#relaxTime            10       (in s, time for relaxation)
+#thermalTime          100
+#runTime              1000     (in s, time for simulation)
+#timeForGraph         1e0      (in s, time between graphics)
+#timeForWriteRun      1e0      (in s, time between writes)
+#timeForWriteThermal  1e0      (in s, time between writes)
+#meanR                0.02     (in m, mean disk radius)
+#density              3.57     (density of the material)
+#kn                   4.5e6    (normal elastic constant)
+#pr                   0.37     (poisson ratio of the material)
+#mu                   0.1      (friction coefficient)
+#vGamma               150      (viscoelastic dissipation)
+#bCondType            1        (1: sinusoidal 2:random vib)
+#relInitDisp          1        (between 1 and -1)
+#wedge                1
 """)
 
 
