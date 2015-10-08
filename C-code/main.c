@@ -88,9 +88,14 @@ void get_input()
         } else if (strcmp(type,"#timeForGraph") == 0) {
             sscanf(value, "%lf", &global.timeForGraph);
             printf("Time between graphics = %e s. \n", global.timeForGraph);
-        } else if (strcmp(type,"#timeForWrite") == 0) {
-            sscanf(value, "%lf", &global.timeForWrite);
-            printf("Time between writes = %e s. \n", global.timeForWrite);
+        } else if (strcmp(type,"#timeForWriteRun") == 0) {
+            sscanf(value, "%lf", &global.timeForWriteRun);
+            printf("Time between writes during main simulation= %e s. \n",
+                   global.timeForWriteRun);
+        } else if (strcmp(type,"#timeForWriteThermal") == 0) {
+            sscanf(value, "%lf", &global.timeForWriteThermal);
+            printf("Time between writes during thermalization= %e s. \n",
+                   global.timeForWriteThermal);
         } else if (strcmp(type,"#meanR") == 0) {
             sscanf(value, "%lf", &diskParameters.meanR);
             printf("Mean disk radius = %e m. \n", diskParameters.meanR);
@@ -171,8 +176,8 @@ int main(/*int argc, char *argv[]*/)
 #ifdef GRAPHICS
     long stepsForGraph = (long)(global.timeForGraph/timestep);
 #endif
-    long stepsForWrite = (long)(global.timeForWrite/timestep);
-    long stepsForWrite2 = (long)(1e-4/timestep); //To record last second
+    long stepsForWriteRun = (long)(global.timeForWriteRun/timestep);
+    long stepsForWriteThermal = (long)(global.timeForWriteRun/timestep);
     global.time = -timestep*nStepsRelax - timestep*nStepsThermal;
 
     /*Set up constants for the gear integrator.*/
@@ -215,9 +220,6 @@ int main(/*int argc, char *argv[]*/)
         }
 #endif
         step(i);
-        if (!(i % stepsForWrite)) {
-            //write_results();
-        }
         global.bGamma = (nStepsRelax-1-i)/(nStepsRelax-1)*100000;
     }
     /*Tilt system and turn on vibration. Thermalization.
@@ -231,8 +233,8 @@ int main(/*int argc, char *argv[]*/)
             graphics(relaxing);
         }
 #endif
-        if (!(i % stepsForWrite)) {
-            //write_results();
+        if (!(i % stepsForWriteThermal)) {
+            write_results();
         }
         step(i);
     }
@@ -266,8 +268,7 @@ int main(/*int argc, char *argv[]*/)
         search_collisions();
 #endif
 
-        if (!(i % stepsForWrite) ||  // Improve resolution for the last second.
-            ((global.runTime - global.time < 1) && !(i % stepsForWrite2))) {
+        if (!(i % stepsForWriteRun)) {
             write_results();
         }
         step(i);

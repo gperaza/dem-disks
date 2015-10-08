@@ -47,7 +47,8 @@ typedef struct systemParameters
     double timestep;
     double relaxTime; double runTime; double thermalTime;
     double timeForGraph;
-    double timeForWrite;
+    double timeForWriteRun;
+    double timeForWriteThermal;
     double a[5];
     double c[6];
     int bCondType;
