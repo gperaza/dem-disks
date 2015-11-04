@@ -74,7 +74,7 @@ void get_input()
             printf("Gravity angle = %e PI radians.\n", global.gravityAngle);
         } else if (strcmp(type,"#bGamma") == 0) {
             sscanf(value, "%lf", &global.bGamma);
-            printf("Bulk gamma = %e. \n", global.bGamma);
+            printf("Bulk damping ratio = %e. \n", global.bGamma);
         } else if (strcmp(type,"#timestep") == 0) {
             sscanf(value, "%lf", &global.timestep);
             //global.timestep = auto_timestep(global.timestep);
@@ -113,7 +113,7 @@ void get_input()
             printf("Disk's friction coefficient = %e. \n", diskParameters.mu);
         } else if (strcmp(type,"#vGamma") == 0) {
             sscanf(value, "%lf", &diskParameters.vGamma);
-            printf("Viscoelastic gamma = %e. \n", diskParameters.vGamma);
+            printf("Viscoelastic damping ratio = %e. \n", diskParameters.vGamma);
         } else if (strcmp(type,"#bCondType") == 0) {
             sscanf(value, "%d", &global.bCondType);
             printf("Boundary conditions for bottom = %d. \n", global.bCondType);
@@ -220,7 +220,7 @@ int main(/*int argc, char *argv[]*/)
         }
 #endif
         step(i);
-        global.bGamma = (nStepsRelax-1-i)/(nStepsRelax-1)*100000;
+        global.bGamma = (nStepsRelax-1-i)/(nStepsRelax-1)*1000;
     }
     /*Tilt system and turn on vibration. Thermalization.
       Define phase such that vibration starts smoothly from zero.*/

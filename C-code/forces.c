@@ -35,6 +35,7 @@ void make_forces() {
 void bulk_force(long i, double cga, double sga) {
     double gravity = global.gravity;
     double bGamma = global.bGamma;
+    double kn = diskParameters.kn;
 
     /*A positive gravity angle tilts the system counter clockwise,
       i.e.  in this reference frame the gravity vector rotates
@@ -42,8 +43,8 @@ void bulk_force(long i, double cga, double sga) {
     particle[i].fx += -particle[i].mass*gravity*sga;
     particle[i].fy += -particle[i].mass*gravity*cga;
 
-    particle[i].fx += - bGamma * particle[i].x1*particle[i].mass;
-    particle[i].fy += - bGamma * particle[i].y1*particle[i].mass;
+    particle[i].fx += - 2*bGamma*sqrt(0.5*particle[i].mass*kn)*particle[i].x1;
+    particle[i].fy += - 2*bGamma*sqrt(0.5*particle[i].mass*kn)*particle[i].y1;
 
     return;
 }
@@ -160,7 +161,7 @@ double normal_force_disk_disk(long i, long j, double r12,
     }
 
     normalForce = kn*(radsum - r12);
-    normalForce -= vGamma*sqrt(effMass)*(rx12n*vx12 + ry12n*vy12);
+    normalForce -= 2*vGamma*sqrt(effMass*kn)*(rx12n*vx12 + ry12n*vy12);
     normalForce = fmax(0, normalForce);
 
     global.potEnergyElasNorm += 0.5*kn*(radsum - r12)*(radsum - r12);

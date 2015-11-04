@@ -102,7 +102,7 @@ void corrector_rotations(disk *particle) {
     double *c = global.c;
     double correctorW;
 
-    correctorW = (particle->fw/particle->iMoment-particle->w2);
+    correctorW = (particle->fw/particle->iMoment - particle->w2);
     particle->w0 += (c[0] * correctorW);
     particle->w1 += (c[1] * correctorW);
     particle->w2 += (c[2] * correctorW);

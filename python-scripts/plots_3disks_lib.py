@@ -24,15 +24,20 @@ def save_gnuplot(x, y, name):
 def disk_fall(directory="."):
     fall = False
     dataFile = directory + "/ending_phase_space.out"
-    f = open(dataFile,"r")
+    f = open(dataFile, "r")
     reader = csv.reader(f, delimiter = " ")
     for row in reader:
         if row[0] == "0":
             xi = float(row[26])
             xf = float(row[5])
             R = float(row[2])
-    if abs(xf-xi) > R:
-        fall = True
+    try:
+        if abs(xf-xi) > R:
+            fall = True
+    except UnboundLocalError:
+        print("This directory is not done.")
+        print(directory)
+        exit(0)
     f.close()
     return fall
 
