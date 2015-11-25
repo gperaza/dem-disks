@@ -256,39 +256,41 @@ void save_collision_data(long i, int colliding) {
 void write_collision(long i, int colliding, unsigned long collisionN) {
 
 #ifdef P_ALL_COLL
-    int j = 0;
-    FILE *fCollision;
-    char fname[50];
-    sprintf(fname, "Collisions/collision_%ld.out", collisionN);
-    fCollision = fopen(fname, "w");
-    for (j = 0; j <= i; j++) {
-        fprintf(fCollision, "%16.12e %16.12e %16.12e %16.12e %16.12e %16.12e "
-                "%16.12e %16.12e %16.12e %16.12e %16.12e %16.12e "
-                "%16.12e %16.12e %16.12e %16.12e %16.12e %16.12e "
-                "%16.12e %16.12e %16.12e\n",
-                coll_data[j].time - coll_data[0].time,
-                coll_data[j].Fn, coll_data[j].Ft,
-                coll_data[j].gn, coll_data[j].gt,
-                coll_data[j].x, coll_data[j].y, coll_data[j].theta,
-                coll_data[j].vx, coll_data[j].vy, coll_data[j].w,
-                coll_data[j].vt0,
-                coll_data[j].vn0,
-                coll_data[j].stretch,
-                coll_data[j].rx12n,
-                coll_data[j].ry12n,
-                coll_data[j].xb,
-                coll_data[j].yb,
-                coll_data[j].vyb,
-                coll_data[j].Ftg,
-                coll_data[j].Fng);
+    if (collisionN % 10 == 0) {
+        int j = 0;
+        FILE *fCollision;
+        char fname[50];
+        sprintf(fname, "Collisions/collision_%ld.out", collisionN);
+        fCollision = fopen(fname, "w");
+        for (j = 0; j <= i; j++) {
+            fprintf(fCollision, "%16.12e %16.12e %16.12e %16.12e %16.12e %16.12e "
+                    "%16.12e %16.12e %16.12e %16.12e %16.12e %16.12e "
+                    "%16.12e %16.12e %16.12e %16.12e %16.12e %16.12e "
+                    "%16.12e %16.12e %16.12e\n",
+                    coll_data[j].time - coll_data[0].time,
+                    coll_data[j].Fn, coll_data[j].Ft,
+                    coll_data[j].gn, coll_data[j].gt,
+                    coll_data[j].x, coll_data[j].y, coll_data[j].theta,
+                    coll_data[j].vx, coll_data[j].vy, coll_data[j].w,
+                    coll_data[j].vt0,
+                    coll_data[j].vn0,
+                    coll_data[j].stretch,
+                    coll_data[j].rx12n,
+                    coll_data[j].ry12n,
+                    coll_data[j].xb,
+                    coll_data[j].yb,
+                    coll_data[j].vyb,
+                    coll_data[j].Ftg,
+                    coll_data[j].Fng);
+        }
+        fclose(fCollision);
     }
-    fclose(fCollision);
 #endif
 
     /*1-colN  2-tc  3-gn'  4-gn  5-gt'  6-gt
       7-vt0'  8-vt0  9-vn0' 10-vn0  11-w0'  12-w0*/
     fprintf(fCollisions,"%ld %16.12e %16.12e %16.12e %16.12e %16.12e %16.12e "
-            "%16.12e %16.12e %16.12e %16.12e %16.12e %16.12e "
+            "%16.12e %16.12e %16.12e %16.12e %16.12e %16.12e %16.12e %16.12e "
             "%16.12e %16.12e %16.12e %16.12e %d\n",
             collisionN,
             coll_data[i].time, coll_data[0].time,
@@ -297,8 +299,8 @@ void write_collision(long i, int colliding, unsigned long collisionN) {
             coll_data[i].vt0, coll_data[0].vt0,
             coll_data[i].vn0, coll_data[0].vn0,
             coll_data[i].w, coll_data[0].w,
-            coll_data[i].vyb,
-            coll_data[i].yb,
+            coll_data[i].vyb, coll_data[0].vyb,
+            coll_data[i].yb, coll_data[0].yb,
             -global.gravity*(sin(global.gravityAngle)*coll_data[i].rx12n
                              + cos(global.gravityAngle)*coll_data[i].ry12n),
             -global.gravity*(sin(global.gravityAngle)*coll_data[i].ry12n

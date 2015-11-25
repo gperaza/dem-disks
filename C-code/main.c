@@ -177,7 +177,7 @@ int main(/*int argc, char *argv[]*/)
     long stepsForGraph = (long)(global.timeForGraph/timestep);
 #endif
     long stepsForWriteRun = (long)(global.timeForWriteRun/timestep);
-    long stepsForWriteThermal = (long)(global.timeForWriteRun/timestep);
+    long stepsForWriteThermal = (long)(global.timeForWriteThermal/timestep);
     global.time = -timestep*nStepsRelax - timestep*nStepsThermal;
 
     /*Set up constants for the gear integrator.*/
