@@ -65,42 +65,19 @@ void phase_plot(FILE* fp) {
 
     /*Print the header of each frame with relevant information.*/
     fprintf(fp, "#NewFrame\n"
-            "#type:Disks3RadiiSinusoidalBottom\n"
             "#nParticles:%ld\n"
             "#time:%e\n"
-            "#timestep:%e\n"
-            "#box_w:%e\n"
-            "#box_h:%e\n"
             "#freq:%e\n"
             "#dimensionlessAc:%e\n"
             "#epsilon:%e\n"
-            "#gravity:%e\n"
             "#gravityAngle:%e\n"
-            "#bGamma:%e\n"
-            "#vGamma:%e\n"
-            "#density:%e\n"
-            "#kn:%e\n"
-            "#kt:%e\n"
-            "#mu:%e\n"
-            "#bCondType:%d\n"
             "#EndOfHeader\n",
             global.nParticles,
             global.time,
-            global.timestep,
-            global.box_w,
-            global.box_h,
             global.freq,
             global.dimensionlessAc,
             global.epsilon,
-            global.gravity,
-            global.gravityAngle,
-            global.bGamma,
-            diskParameters.vGamma,
-            diskParameters.density,
-            diskParameters.kn,
-            diskParameters.kt,
-            diskParameters.mu,
-            global.bCondType
+            global.gravityAngle
             );
 
     /*Print the state of the system*/
