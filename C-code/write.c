@@ -188,19 +188,13 @@ void search_collisions() {
             i++;
             assert(i < 1000000);
             save_collision_data(i, colliding);
-            if (global.runTime < 150) {
-                write_collision(i, colliding, collisionN);
-            }
-            if (global.runTime - global.time < 100) {
-                /*Take statistics form the last 100 seconds*/
-                collision_stats(i, colliding);}
+            write_collision(i, colliding, collisionN);
+            collision_stats(i, colliding);
             colliding = 0;
         } else {
             /*All other possibilities invalidate the collision.*/
             colliding = 0;
-            if (global.runTime - global.time < 100) {
-                notCollisionN ++;
-            }
+            notCollisionN ++;
         }
     }
 }
@@ -256,36 +250,40 @@ void save_collision_data(long i, int colliding) {
 void write_collision(long i, int colliding, unsigned long collisionN) {
 
 #ifdef P_ALL_COLL
-    if (collisionN % 10 == 0) {
-        int j = 0;
-        FILE *fCollision;
-        char fname[50];
-        sprintf(fname, "Collisions/collision_%ld.out", collisionN);
-        fCollision = fopen(fname, "w");
-        for (j = 0; j <= i; j++) {
-            fprintf(fCollision, "%16.12e %16.12e %16.12e %16.12e %16.12e %16.12e "
-                    "%16.12e %16.12e %16.12e %16.12e %16.12e %16.12e "
-                    "%16.12e %16.12e %16.12e %16.12e %16.12e %16.12e "
-                    "%16.12e %16.12e %16.12e\n",
-                    coll_data[j].time - coll_data[0].time,
-                    coll_data[j].Fn, coll_data[j].Ft,
-                    coll_data[j].gn, coll_data[j].gt,
-                    coll_data[j].x, coll_data[j].y, coll_data[j].theta,
-                    coll_data[j].vx, coll_data[j].vy, coll_data[j].w,
-                    coll_data[j].vt0,
-                    coll_data[j].vn0,
-                    coll_data[j].stretch,
-                    coll_data[j].rx12n,
-                    coll_data[j].ry12n,
-                    coll_data[j].xb,
-                    coll_data[j].yb,
-                    coll_data[j].vyb,
-                    coll_data[j].Ftg,
-                    coll_data[j].Fng);
-        }
-        fclose(fCollision);
+    int j = 0;
+    FILE *fCollision;
+    char fname[50];
+    /* We store only the last 1000 collisions to avoid saving huge
+       amounts of data.*/
+    sprintf(fname, "Collisions/collision_%ld.out", collisionN % 1000);
+    fCollision = fopen(fname, "w");
+    fprintf(fCollision, "#Collision number: %ld", collisionN);
+    for (j = 0; j <= i; j++) {
+        fprintf(fCollision, "%16.12e %16.12e %16.12e %16.12e %16.12e %16.12e "
+                "%16.12e %16.12e %16.12e %16.12e %16.12e %16.12e "
+                "%16.12e %16.12e %16.12e %16.12e %16.12e %16.12e "
+                "%16.12e %16.12e %16.12e\n",
+                coll_data[j].time - coll_data[0].time,
+                coll_data[j].Fn, coll_data[j].Ft,
+                coll_data[j].gn, coll_data[j].gt,
+                coll_data[j].x, coll_data[j].y, coll_data[j].theta,
+                coll_data[j].vx, coll_data[j].vy, coll_data[j].w,
+                coll_data[j].vt0,
+                coll_data[j].vn0,
+                coll_data[j].stretch,
+                coll_data[j].rx12n,
+                coll_data[j].ry12n,
+                coll_data[j].xb,
+                coll_data[j].yb,
+                coll_data[j].vyb,
+                coll_data[j].Ftg,
+                coll_data[j].Fng);
     }
+    fclose(fCollision);
 #endif
+
+    /* Don't store more than 10e5 collisions.*/
+    if (collisionN > 10e6) return;
 
     /*1-colN  2-tc  3-gn'  4-gn  5-gt'  6-gt
       7-vt0'  8-vt0  9-vn0' 10-vn0  11-w0'  12-w0*/
