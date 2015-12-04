@@ -71,7 +71,47 @@ def plot_vel_ac_for_tilts():
     plt.close(figAll)
 
 
-def plot_vel_tilt_for_acs():
+def plot_vel_tilt_for_acs_ac():
+    acList = get_acs()
+    tiltList = get_tilts()
+    if len(tiltList) <= 1:
+        return
+
+    figAll = plt.figure(num=1, figsize=(12, 10))
+    axAll = figAll.add_subplot(111)
+    axAll.set_title("Rotational velocity vs tilt")
+    axAll.set_xlabel("tilt (rho/pi)")
+    axAll.set_ylabel("Rotational velocity(rpm)/ac")
+
+    for ac in acList:
+        if float(ac) == 0:
+            continue
+        p3d.plot_vel_tilt_for_ac(ac, ax=axAll, scale=1/float(ac))
+
+        figOne = plt.figure(num=2, figsize=(12, 10))
+
+        axVel = figOne.add_subplot(211)
+        axVel.set_title("Rotational velocity vs tilt")
+        axVel.set_xlabel("tilt (rho/pi)")
+        axVel.set_ylabel("Rotational velocity(rpm)")
+        p3d.plot_vel_tilt_for_ac(ac, ax=axVel)
+        axVel.legend(loc="best")
+
+        axLinks = figOne.add_subplot(212)
+        axLinks.set_title("Probability of link states vs acceleration.")
+        axLinks.set_xlabel("tilt (rho/pi)")
+        axLinks.set_ylabel("State probability")
+        p3d.plot_links_tilt_for_ac(ac, ax=axLinks)
+        axLinks.legend(loc="best")
+
+        figOne.savefig("plot_vel_tilt_for_ac_"+ac+".png", format="png")
+        plt.close(figOne)
+    axAll.legend(loc="best")
+    figAll.savefig("plot_vel_tilt_all_1.png", format="png")
+    plt.close(figAll)
+
+
+def plot_vel_tilt_for_acs_ac2():
     acList = get_acs()
     tiltList = get_tilts()
     if len(tiltList) <= 1:
@@ -107,7 +147,7 @@ def plot_vel_tilt_for_acs():
         figOne.savefig("plot_vel_tilt_for_ac_"+ac+".png", format="png")
         plt.close(figOne)
     axAll.legend(loc="best")
-    figAll.savefig("plot_vel_tilt_all.png", format="png")
+    figAll.savefig("plot_vel_tilt_all_2.png", format="png")
     plt.close(figAll)
 
 
@@ -117,7 +157,8 @@ def main():
     # print("Plotting vel vs ac")
     # plot_vel_ac_for_tilts()
     print("Plotting vel vs tilt")
-    plot_vel_tilt_for_acs()
+    plot_vel_tilt_for_acs_ac()
+    plot_vel_tilt_for_acs_ac2()
     print("Done")
 
 if __name__ == "__main__":

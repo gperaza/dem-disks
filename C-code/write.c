@@ -259,11 +259,9 @@ void write_collision(long i, int colliding, unsigned long collisionN) {
     fclose(fCollision);
 #endif
 
-    /* Don't store more than 10e5 collisions.*/
+    /* Don't store more than 10e6 collisions.*/
     if (collisionN > 10e6) return;
 
-    /*1-colN  2-tc  3-gn'  4-gn  5-gt'  6-gt
-      7-vt0'  8-vt0  9-vn0' 10-vn0  11-w0'  12-w0*/
     fprintf(fCollisions,"%ld %16.12e %16.12e %16.12e %16.12e %16.12e %16.12e "
             "%16.12e %16.12e %16.12e %16.12e %16.12e %16.12e %16.12e %16.12e "
             "%16.12e %16.12e %16.12e %16.12e %d\n",

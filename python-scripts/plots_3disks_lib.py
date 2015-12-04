@@ -499,17 +499,17 @@ def plot_links_ac_for_tilt(tilt, ax=None, show=False):
                 ac.append(float(row[0].split(":")[1]))
         readerFile.close()
     if ax is not None:
-        ax.plot(ac, open1, label="Link 1 opened, 2 closed.", marker=".")
-        ax.plot(ac, open2, label="Link 2 opened, 1 closed.", marker=".")
-        ax.plot(ac, bothOpen, label="Both links opened.", marker=".")
+        ax.plot(ac, open1, label="Link 1 open, 2 closed.", marker=".")
+        ax.plot(ac, open2, label="Link 2 open, 1 closed.", marker=".")
+        ax.plot(ac, bothOpen, label="Both links open.", marker=".")
         return
     plt.figure(figsize=(8, 6))
     plt.title("Probability of links states vs acceleration for tilt="+tilt)
     plt.xlabel("Dimensionless acceleration")
     plt.ylabel("State probability")
-    plt.plot(ac, open1, label="Link 1 opened, 2 closed.", marker=".")
-    plt.plot(ac, open2, label="Link 2 opened, 1 closed.", marker=".")
-    plt.plot(ac, bothOpen, label="Both links opened.", marker=".")
+    plt.plot(ac, open1, label="Link 1 open, 2 closed.", marker=".")
+    plt.plot(ac, open2, label="Link 2 open, 1 closed.", marker=".")
+    plt.plot(ac, bothOpen, label="Both links open.", marker=".")
     if show:
         plt.show()
     else:
@@ -560,17 +560,17 @@ def plot_links_tilt_for_ac(ac, ax=None, show=False):
     tilt = np.array(tilt)
     tilt = tilt/np.pi  # change units (rho/pi)
     if ax is not None:
-        ax.plot(tilt, open1, label="Link 1 opened, 2 closed.", marker=".")
-        ax.plot(tilt, open2, label="Link 2 opened, 2 closed.", marker=".")
-        ax.plot(tilt, bothOpen, label="Both links opened.", marker=".")
+        ax.plot(tilt, open1, label="Link 1 open, 2 closed.", marker=".")
+        ax.plot(tilt, open2, label="Link 2 open, 2 closed.", marker=".")
+        ax.plot(tilt, bothOpen, label="Both links open.", marker=".")
         return
     plt.figure(figsize=(8, 6))
     plt.title("Probability of links states vs tilt for ac="+ac)
     plt.xlabel("Tilt (rho/pi)")
     plt.ylabel("State probability")
-    plt.plot(tilt, open1, label="Link 1 opened, 2 closed.", marker=".")
-    plt.plot(tilt, open2, label="Link 2 opened, 1 closed.", marker=".")
-    plt.plot(tilt, bothOpen, label="Both links opened.", marker=".")
+    plt.plot(tilt, open1, label="Link 1 open, 2 closed.", marker=".")
+    plt.plot(tilt, open2, label="Link 2 open, 1 closed.", marker=".")
+    plt.plot(tilt, bothOpen, label="Both links open.", marker=".")
     if show:
         plt.show()
     else:

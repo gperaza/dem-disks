@@ -178,6 +178,7 @@ int main(/*int argc, char *argv[]*/)
 #endif
     long stepsForWriteRun = (long)(global.timeForWriteRun/timestep);
     long stepsForWriteThermal = (long)(global.timeForWriteThermal/timestep);
+    long stepsForPrint = (long)(1.0/timestep);
     global.time = -timestep*nStepsRelax - timestep*nStepsThermal;
 
     /*Set up constants for the gear integrator.*/
@@ -214,6 +215,9 @@ int main(/*int argc, char *argv[]*/)
     global.gravityAngle = 0;
     global.vibrating = 0;
     for (i = 0; i < nStepsRelax; i++) {
+        if (!(i % stepsForPrint)) {
+            printf("\rRelaxing %.0lf%%", (double)i/nStepsRelax*100);
+            fflush(stdout);}
 #ifdef GRAPHICS
         if (!(i % stepsForGraph)) {
             graphics(relaxing);
@@ -222,12 +226,16 @@ int main(/*int argc, char *argv[]*/)
         step(i);
         global.bGamma = (nStepsRelax-1-i)/(nStepsRelax-1)*1000;
     }
+    printf("\rRelaxing 100%%\n");
     /*Tilt system and turn on vibration. Thermalization.
       Define phase such that vibration starts smoothly from zero.*/
     global.phase = 2*M_PI*global.freq*global.time - asin(global.relInitDisp);
     global.gravityAngle = gravityAngleAux;
     global.vibrating = 1;
     for (i = 0; i < nStepsThermal; i++) {
+        if (!(i % stepsForPrint)) {
+            printf("\rThermalizing %.0lf%%", (double)i/nStepsThermal*100);}
+            fflush(stdout);
 #ifdef GRAPHICS
         if (!(i % stepsForGraph)) {
             graphics(relaxing);
@@ -238,6 +246,7 @@ int main(/*int argc, char *argv[]*/)
         }
         step(i);
     }
+    printf("\rThermalizing 100%%\n");
     /*------------------------------------------------------------------------*/
     phase_plot(fFirst);
     for (i = 0; i < global.nParticles; i++) {
@@ -258,6 +267,9 @@ int main(/*int argc, char *argv[]*/)
 #endif
 
     for (i = 0; i < nStepsRun; i++) {
+        if (!(i % stepsForPrint)) {
+            printf("\rSimulating %.0lf%%", (double)i/nStepsRun*100);
+            fflush(stdout);}
 #ifdef GRAPHICS
         if (!(i % stepsForGraph)) {
             graphics(relaxing);
@@ -273,6 +285,7 @@ int main(/*int argc, char *argv[]*/)
         }
         step(i);
     }
+    printf("\rSimulating 100%%\n");
 
     phase_plot(fLast);
     if (global.nParticles == 3) {
