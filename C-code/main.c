@@ -242,7 +242,7 @@ int main(/*int argc, char *argv[]*/)
         }
 #endif
         if (!(i % stepsForWriteThermal)) {
-            write_results();
+            //write_results();
         }
         step(i);
     }
