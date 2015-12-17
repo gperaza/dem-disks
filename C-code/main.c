@@ -368,7 +368,7 @@ long init_system()
             particle[i].radius = meanR;
         particle[i].mass = density*particle[i].radius*particle[i].radius*M_PI;
         particle[i].iMoment =
-            particle[i].mass*particle[i].radius*particle[i].radius/2;
+            particle[i].mass*particle[i].radius*particle[i].radius*0.5;
     }
 
     /*Now make a random permutation (Knuth permutation).*/
