@@ -5,8 +5,6 @@ double normal_force_disk_disk(long, long, double, double,
                               double, double);
 double tangential_force_disk_disk(double, long, long, double,
                                   double, double, double, double);
-void pair_force_disks(long, long);
-void pair_force_disk_line(long, long);
 
 void make_forces() {
     long i, j;
