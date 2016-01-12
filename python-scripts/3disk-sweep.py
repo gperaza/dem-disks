@@ -31,7 +31,7 @@ def write_input_file(ac, tilt, dirname):
 #kn                   4.5e6    (normal elastic constant)
 #pr                   0.37     (poisson ratio of the material)
 #mu                   0.1      (friction coefficient)
-#vGamma               150      (viscoelastic dissipation)
+#vGamma               0.035    (viscoelastic dissipation)
 #bCondType            1        (1: sinusoidal 2:random vib)
 #relInitDisp          1        (between 1 and -1)
 #wedge                1
@@ -49,6 +49,7 @@ def run_simulation((ac, tilt)):
             return
     else:
         os.mkdir(dirname)
+        os.mkdir(dirname+"/Collisions")
 
     write_input_file(ac, tilt, dirname)
     log = open(dirname + "/log", "w")
@@ -66,19 +67,21 @@ def main():
     os.chdir("3diskSimSweep")
 
     # List of acceleration amplitudes
-    acList1 = ["1.0000"]
-    acList2 = ["%06.4f"%x for x in np.arange(0, 1.25, 0.05)]
+    acList1 = ["1.0"]
+    acList2 = ["%06.4f"%x for x in np.arange(0.8, 1.25, 0.05)]
     acList3 = ["%06.4f"%x for x in np.arange(0, 1.25, 0.005)]
+    acList4 = ["0.8", "0.9", "1.0", "1.1", "1.2", "1.4", "2.0", "3.0", "4.0"]
 
     # List of tilt angles.
     tiltList1 = ["0.000"]
     tiltList2 = ["%05.3f"%x for x in np.arange(0, 0.166, 0.01)]
     tiltList3 = ["%05.3f"%x for x in np.arange(0, 0.166, 0.001)]
     tiltList4 = ["%05.3f"%x for x in np.arange(0, 0.071, 0.001)]
+    tiltList5 = ["%04.2f"%x for x in np.arange(0, 0.166, 0.01)]
 
     pool_size = 16
     pool = multiprocessing.Pool(processes=pool_size)
-    pool.map(run_simulation, itertools.product(acList2, tiltList3))
+    pool.map(run_simulation, itertools.product(acList4, tiltList5))
     pool.close()  # no more tasks
     pool.join()  # wrap up current tasks
     os.chdir("..")
