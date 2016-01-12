@@ -29,11 +29,8 @@ void search_collisions();
 void write_collision_stats();
 long init_system();
 void init_system_wedge();
-/******************************************************************************/
 
 void get_input()
-
-/******************************************************************************/
 {
     char input[200];
     char type[200];
@@ -153,11 +150,7 @@ void get_input()
     return;
 }
 
-/******************************************************************************/
-
 int main(/*int argc, char *argv[]*/)
-
-/******************************************************************************/
 {
     /*First, print the version of the program used.*/
     printf("Version: %s\n", VERSION);
@@ -308,11 +301,7 @@ int main(/*int argc, char *argv[]*/)
     return 0;
 }
 
-/******************************************************************************/
-
 long init_system()
-
-/******************************************************************************/
 {
     long nParticles = global.nParticles;
     double box_w = global.box_w;
@@ -410,11 +399,7 @@ long init_system()
     return (nParticles);
 }
 
-/******************************************************************************/
-
 void init_system_wedge()
-
-/******************************************************************************/
 {
     double meanR = diskParameters.meanR;
     double density = diskParameters.density;
@@ -465,11 +450,7 @@ void init_system_wedge()
     return;
 }
 
-/******************************************************************************/
-
 void step(long kstep)
-
-/******************************************************************************/
 {
     long i = 0;
     long nParticles = global.nParticles;
@@ -523,33 +504,7 @@ void step(long kstep)
     return;
 }
 
-/******************************************************************************/
-
 void clock_time(int iTime)
-
-/******************************************************************************/
-/*
-  Purpose:
-
-  CLOCK_TIME prints CPU and wall time of execution.
-
-  Discussion:
-
-  Prints CPU time and wall time in human readable format since a starting time
-  given as a parameter.
-
-  Modified:
-
-  15 May 2014 by GGPM.
-
-  Author:
-
-  Gonzalo G. Peraza Mues (GGPM)
-
-  Parameters:
-
-  int iTime - Initial time.
-*/
 {
     int days, hours, minutes, seconds;
     int tTime = (int)time(NULL) - iTime;
