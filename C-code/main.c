@@ -17,6 +17,7 @@ links_3disks links3;
 FILE *fPhase, *fFirst, *fLast, *fLinkStat, *fLinks, *fEnergy;
 FILE *fp;
 FILE *fCollisions;
+FILE *fPhase2;
 
 gsl_rng * rgen;
 
@@ -29,9 +30,9 @@ void search_collisions();
 void write_collision_stats();
 long init_system();
 void init_system_wedge();
+void init_system_file(FILE*);
 
-void get_input()
-{
+void get_input() {
     char input[200];
     char type[200];
     char value[200];
@@ -150,8 +151,7 @@ void get_input()
     return;
 }
 
-int main(/*int argc, char *argv[]*/)
-{
+int main(/*int argc, char *argv[]*/) {
     /*First, print the version of the program used.*/
     printf("Version: %s\n", VERSION);
 
@@ -178,6 +178,7 @@ int main(/*int argc, char *argv[]*/)
     set_constants(timestep);
 
     fPhase = fopen("phase_space.out", "w");
+    fPhase2 = fopen("phase_space_2.out", "w");
     fFirst = fopen("initial_phase_space.out", "w");
     fLast = fopen("ending_phase_space.out", "w");
     fLinkStat = fopen("3disk_linkstat.out", "w");
@@ -188,12 +189,16 @@ int main(/*int argc, char *argv[]*/)
 #endif
 
     /*Initialize the packing and make nParticles include walls, we
-      now consider a wedge as a special case when nParticles == 1.*/
+      now consider a wedge as a special case when wedge == 1.*/
+    FILE *input_fptr;
     printf("Simulating for %ld particles.\n", global.nParticles);
     if (global.wedge == 1) {
         global.nParticles = 3;
         init_system_wedge();
         printf("Simulating a wedge.\n");
+    } else if ((input_fptr = fopen("input_phase_space.in", "r")) != NULL){
+        init_system_file(input_fptr);
+        fclose(input_fptr);
     } else {
         global.nParticles = init_system();
     }
@@ -290,7 +295,7 @@ int main(/*int argc, char *argv[]*/)
 #endif
 
     free(particle); free(nStats);
-    fclose(fFirst); fclose(fPhase); fclose(fLast);
+    fclose(fFirst); fclose(fPhase); fclose(fPhase2); fclose(fLast);
     fclose(fLinkStat); fclose(fLinks); fclose(fEnergy);
 
 #ifdef COLLISIONS
@@ -301,8 +306,7 @@ int main(/*int argc, char *argv[]*/)
     return 0;
 }
 
-long init_system()
-{
+long init_system() {
     long nParticles = global.nParticles;
     double box_w = global.box_w;
     double box_h = global.box_h;
@@ -399,8 +403,7 @@ long init_system()
     return (nParticles);
 }
 
-void init_system_wedge()
-{
+void init_system_wedge() {
     double meanR = diskParameters.meanR;
     double density = diskParameters.density;
     long i;
@@ -450,8 +453,71 @@ void init_system_wedge()
     return;
 }
 
-void step(long kstep)
-{
+void init_system_file(FILE *input_fptr) {
+    /* Get input from file. */
+    /* First line is nDisks nWalls box_w box_h*/
+    /* File data as
+       p1x p1y nx ny
+       x y R mass iMoment */
+    char input[500];
+    long nDisks, nWalls;
+
+    /* Read nDisks and nWalls. */
+    if (fgets(input, sizeof(input), input_fptr) == NULL) exit(1);
+    sscanf(input,"%ld %ld %lf %lf",
+           &nDisks, &nWalls, &global.box_w, &global.box_h);
+    global.nParticles = nDisks + nWalls;
+    global.box_w *= 1.1; global.box_h *= 1.1;
+
+    /* Allocate memory. */
+    particle = (disk*)calloc(global.nParticles, sizeof(disk));
+
+    /* Setup particles and walls. */
+    for (long i = nDisks; i < global.nParticles; i++) {
+        double p1x, p1y, nx, ny;
+        particle[i].type = 2;
+        /* Wall data: p1x p1y nx ny. */
+        if (fgets(input, sizeof(input), input_fptr) == NULL) exit(1);
+        sscanf(input,"%lf %lf %lf %lf", &p1x, &p1y, &nx, &ny);
+        particle[i].p1x = p1x;
+        particle[i].p1y = p1y;
+        particle[i].p2x = p1x + ny;
+        particle[i].p2y = p1y - nx;
+        /* Store initial positions for boundary conditions */
+        particle[i].p1x0 = particle[i].p1x;
+        particle[i].p1y0 = particle[i].p1y;
+        particle[i].p2x0 = particle[i].p2x;
+        particle[i].p2y0 = particle[i].p2y;
+        /* Set initial displacement of bottom for bottom wall. */
+        if (ny == 1) {
+            particle[i].p1y += global.epsilon*global.relInitDisp;
+            particle[i].p2y += global.epsilon*global.relInitDisp;
+        }
+    }
+    for (long i = 0; i < nDisks; i++) {
+        /* Disk data: x y R mass iMoment */
+        double x, y, R, mass, iMoment;
+        if (fgets(input, sizeof(input), input_fptr) == NULL) exit(1);
+        sscanf(input,"%lf %lf %lf %lf %lf", &x, &y, &R, &mass, &iMoment);
+        particle[i].type = 0;
+        particle[i].x0 = x;
+        particle[i].y0 = y;
+        particle[i].radius = R;
+        particle[i].mass = mass;
+        particle[i].iMoment = iMoment;
+    }
+
+    nStats = (neighbor_stats*)calloc((global.nParticles*global.nParticles
+                                       - global.nParticles)/2 ,
+                                      sizeof(neighbor_stats));
+
+
+    /*Restart RNG for simulation.*/
+    rgen = gsl_rng_alloc(gsl_rng_mt19937);
+    gsl_rng_set(rgen, global.seed);
+}
+
+void step(long kstep) {
     long i = 0;
     long nParticles = global.nParticles;
 
@@ -504,8 +570,7 @@ void step(long kstep)
     return;
 }
 
-void clock_time(int iTime)
-{
+void clock_time(int iTime) {
     int days, hours, minutes, seconds;
     int tTime = (int)time(NULL) - iTime;
     int t;

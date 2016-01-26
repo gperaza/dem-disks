@@ -43,7 +43,7 @@ void graphics(int relaxing) {
     draw_data(cr, box_w, box_h, time);
     color_background(cr, relaxing, box_w, box_h);
     draw_particles(cr, nParticles, box_w, box_h);
-    draw_box(cr, box_w, box_h);
+    //draw_box(cr, box_w, box_h);
     draw_links(cr, nParticles);
 
     cairo_destroy(cr);
@@ -54,10 +54,8 @@ void graphics(int relaxing) {
 
 void draw_particles(cairo_t *cr, long nParticles, double box_w,
                     double box_h) {
-    long i;
-
     cairo_set_line_width(cr,fmin(box_w, box_h)/800);
-    for (i = 0; i < nParticles; i++) {
+    for (long i = 0; i < nParticles; i++) {
         if (particle[i].type == 0 || particle[i].type == 1) {
             draw_disk(cr, i, particle[i].x0, particle[i].y0,
                       particle[i].radius, particle[i].w0, particle[i].type);
@@ -120,14 +118,26 @@ void draw_disk(cairo_t *cr, long id, double x, double y, double r,
 
 void draw_line(cairo_t *cr, double p1x, double p1y, double p2x, double p2y) {
     double box_h = global.box_h;
+    double box_w = global.box_w;
     double m = (p2y - p1y)/(p2x - p1x);
     double b = p1y - m*p1x;
 
-    cairo_set_source_rgb(cr, 0.0, 0.0, 0.0);
-    cairo_move_to(cr, -b/m, 0);
-    cairo_line_to(cr, (box_h - b)/m, box_h);
-    cairo_stroke(cr);
-
+    if (m == 0) {
+       cairo_set_source_rgb(cr, 0.0, 0.0, 0.0);
+       cairo_move_to(cr, -2*box_w, b);
+       cairo_line_to(cr, 2*box_w, b);
+       cairo_stroke(cr);
+    } else if (isinf(m)) {
+        cairo_set_source_rgb(cr, 0.0, 0.0, 0.0);
+        cairo_move_to(cr, p1x, -2*box_h);
+        cairo_line_to(cr, p1x, 2*box_h);
+        cairo_stroke(cr);
+    } else {
+        cairo_set_source_rgb(cr, 0.0, 0.0, 0.0);
+        cairo_move_to(cr, -b/m, 0);
+        cairo_line_to(cr, (box_h - b)/m, box_h);
+        cairo_stroke(cr);
+    }
     return;
 }
 
@@ -143,10 +153,9 @@ void color_background(cairo_t *cr, int relaxing, double box_w, double box_h) {
 }
 
 void draw_box(cairo_t *cr, double box_w, double box_h) {
-
-    cairo_set_line_width(cr,fmin(box_w, box_h)/400);
+    cairo_set_line_width(cr,fmin(box_w, box_h)/400/2);
     cairo_rectangle(cr, 0, 0, box_w, box_h);
-    cairo_set_source_rgb(cr, 0, 0, 0);
+    cairo_set_source_rgb(cr, 1, 0, 0);
     cairo_stroke(cr);
 
     return;

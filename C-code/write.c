@@ -5,8 +5,10 @@ extern FILE *fp;
 extern links_3disks links3;
 extern FILE *fCollisions;
 extern gsl_rng * rgen;
+extern FILE *fPhase2;
 
 void phase_plot(FILE*);
+void phase_plot2(FILE*);
 void write_3disk_linkstat(FILE*);
 void write_3disk_avglinkstat();
 void search_collisions();
@@ -17,6 +19,7 @@ void collision_stats(long, int);
 void write_results() {
 
     phase_plot(fPhase);
+    phase_plot2(fPhase2);
 
     if (global.linkCount) {
         global.meanLinkSat = global.meanLinkSat/global.linkCount;
@@ -110,6 +113,19 @@ void phase_plot(FILE* fp) {
                 );
     }
 
+    fflush(fp);
+    return;
+}
+
+void phase_plot2(FILE* fp) {
+    fprintf(fp, "%e", global.time);
+    for (long i = 0; i < global.nParticles; i++) {
+        fprintf(fp, "%e %e %e %e %e %e %e %e %e",
+                particle[i].radius, particle[i].mass, particle[i].iMoment,
+                particle[i].x0, particle[i].y0, particle[i].w0,
+                particle[i].x1, particle[i].y1, particle[i].w1);
+    }
+    fprintf(fp, "\n");
     fflush(fp);
     return;
 }
@@ -225,7 +241,6 @@ void save_collision_data(long i, int colliding) {
 }
 
 void write_collision(long i, int colliding, unsigned long collisionN) {
-
 #ifdef P_ALL_COLL
     int j = 0;
     FILE *fCollision;
@@ -233,7 +248,10 @@ void write_collision(long i, int colliding, unsigned long collisionN) {
     /* We store only the last 1000 collisions to avoid saving huge
        amounts of data.*/
     sprintf(fname, "Collisions/collision_%ld.out", collisionN % 1000);
-    fCollision = fopen(fname, "w");
+    if((fCollision = fopen(fname, "w")) == NULL){
+        printf("ERROR: Create Collisions directory\n");
+        exit(1);
+    };
     fprintf(fCollision, "#Collision number: %ld", collisionN);
     for (j = 0; j <= i; j++) {
         fprintf(fCollision, "%16.12e %16.12e %16.12e %16.12e %16.12e %16.12e "
