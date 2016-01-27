@@ -157,8 +157,8 @@ int main(/*int argc, char *argv[]*/) {
 
     time_t iTime = time(NULL);
     /*Clean up.*/
-    if (system("rm *.svg")) printf("No *.svg to delete.\n");
-    if (system("rm *.out")) printf("No *.out to delete.\n");
+    // if (system("rm *.svg")) printf("No *.svg to delete.\n");
+    // if (system("rm *.out")) printf("No *.out to delete.\n");
 
     get_input();
 
@@ -196,7 +196,7 @@ int main(/*int argc, char *argv[]*/) {
         global.nParticles = 3;
         init_system_wedge();
         printf("Simulating a wedge.\n");
-    } else if ((input_fptr = fopen("input_phase_space.in", "r")) != NULL){
+    } else if ((input_fptr = fopen("input_phase_space.out", "r")) != NULL){
         init_system_file(input_fptr);
         fclose(input_fptr);
     } else {
