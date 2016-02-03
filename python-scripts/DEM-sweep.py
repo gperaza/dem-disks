@@ -37,13 +37,13 @@ def main():
     os.chdir(sweepdir)
 
     # List of acceleration amplitudes
-    acList = ["00.1", "00.5", "00.9", "01.0", "01.2", "01.5", "02.0", "03.0", 
-              "04.0", "05.0", "06.0", "07.0", "08.0", "09.0", "10.0", "99.0"]
+    acList = ["00.1", "00.5", "00.9", "01.0", "01.2", "01.5", "01.7", "02.0", 
+              "03.0", "04.0", "05.0", "06.0", "07.0", "08.0", "09.0", "10.0"]
 
     # List of seeds.
     # random.seed(123456)
     # seedList = [str(random.randint(100000, 900000)) for x in range(10)]
-    seedList = ["101783"]
+    seedList = ["100000"]
 
     pool_size = 16
     pool = multiprocessing.Pool(processes=pool_size)

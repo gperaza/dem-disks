@@ -118,9 +118,9 @@ void phase_plot(FILE* fp) {
 }
 
 void phase_plot2(FILE* fp) {
-    fprintf(fp, "%e ", global.time);
+    fprintf(fp, "%e", global.time);
     for (long i = 0; i < global.nParticles; i++) {
-        fprintf(fp, "%e %e %e %e %e %e %e %e %e",
+        fprintf(fp, " %e %e %e %e %e %e %e %e %e",
                 particle[i].radius, particle[i].mass, particle[i].iMoment,
                 particle[i].x0, particle[i].y0, particle[i].w0,
                 particle[i].x1, particle[i].y1, particle[i].w1);
