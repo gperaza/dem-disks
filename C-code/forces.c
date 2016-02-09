@@ -159,12 +159,12 @@ double normal_force_disk_disk(long i, long j, double r12,
     }
 
     normalForce = kn*(radsum - r12);
-    normalForce -= 2*vGamma*sqrt(effMass*kn)*(rx12n*vx12 + ry12n*vy12);
-    normalForce = fmax(0, normalForce);
+    normalForce -= vGamma*(rx12n*vx12 + ry12n*vy12); //*2*sqrt(effMass*kn);
+        normalForce = fmax(0, normalForce);
 
-    global.potEnergyElasNorm += 0.5*kn*(radsum - r12)*(radsum - r12);
+        global.potEnergyElasNorm += 0.5*kn*(radsum - r12)*(radsum - r12);
 
-    return normalForce;
+        return normalForce;
 }
 
 double tangential_force_disk_disk(double normalForce, long i,

@@ -111,7 +111,7 @@ void get_input() {
             printf("Disk's friction coefficient = %e. \n", diskParameters.mu);
         } else if (strcmp(type,"#vGamma") == 0) {
             sscanf(value, "%lf", &diskParameters.vGamma);
-            printf("Viscoelastic damping ratio = %e. \n", diskParameters.vGamma);
+            printf("Viscoelastic damping = %e. \n", diskParameters.vGamma);
         } else if (strcmp(type,"#bCondType") == 0) {
             sscanf(value, "%d", &global.bCondType);
             printf("Boundary conditions for bottom = %d. \n", global.bCondType);
@@ -162,6 +162,13 @@ int main(/*int argc, char *argv[]*/) {
 
     get_input();
 
+    /* Automatically adjust timestep to be one hundredth of the
+       normal period of a disk oscillation. */
+
+    global.timestep = 0.01*2*M_PI/
+        sqrt(diskParameters.kn/(diskParameters.density*M_PI*
+                                diskParameters.meanR*diskParameters.meanR));
+    printf("Adjusted timestep = %g", global.timestep);
     double timestep = global.timestep;
     long nStepsRelax = (long)(global.relaxTime/timestep);
     long nStepsThermal = (long)(global.thermalTime/timestep);
@@ -233,7 +240,7 @@ int main(/*int argc, char *argv[]*/) {
     for (i = 0; i < nStepsThermal; i++) {
         if (!(i % stepsForPrint)) {
             printf("\rThermalizing %.0lf%%", (double)i/nStepsThermal*100);}
-            fflush(stdout);
+        fflush(stdout);
 #ifdef GRAPHICS
         if (!(i % stepsForGraph)) {
             graphics(relaxing);
@@ -362,229 +369,229 @@ long init_system() {
         particle[i].mass = density*particle[i].radius*particle[i].radius*M_PI;
         particle[i].iMoment =
             particle[i].mass*particle[i].radius*particle[i].radius*0.5;
-    }
-
-    /*Now make a random permutation (Knuth permutation).*/
-    for (i = 0; i < nParticles; i++) {
-        j = gsl_rng_uniform_int(rgen, i + 1);
-        tempParticle = particle[i];
-        particle[i] = particle[j];
-        particle[j] = tempParticle;
-    }
-
-    /*Now set the x position such that contiguous particles barely touch.*/
-    sumWidth = 0 + (layerN % 2)*meanR;
-    layerY = 2*wallR + (meanR + sigma);
-    for (i = 0; i < nParticles; i++) {
-        if (sumWidth + 2*particle[i].radius > box_w) {
-            layerY += 2*(meanR + sigma);
-            layerN++;
-            sumWidth = 0 + (layerN % 2)*meanR;
         }
-        particle[i].x0 = sumWidth + particle[i].radius;
-        particle[i].y0 = layerY;
-        sumWidth += 2*particle[i].radius;
-    }
-    assert(layerY + (meanR + sigma)  < box_h);
 
-    gsl_rng_free(rgen);
+        /*Now make a random permutation (Knuth permutation).*/
+        for (i = 0; i < nParticles; i++) {
+            j = gsl_rng_uniform_int(rgen, i + 1);
+            tempParticle = particle[i];
+            particle[i] = particle[j];
+            particle[j] = tempParticle;
+        }
 
-    nParticles += nBottom;
-    nStats = (neighbor_stats*)calloc((nParticles*nParticles-nParticles)/2 ,
-                                     sizeof(neighbor_stats));
-    for (i = 0; i < (nParticles*nParticles-nParticles)/2; i++) {
-        nStats[i].touching = 0;
-    }
+        /*Now set the x position such that contiguous particles barely touch.*/
+        sumWidth = 0 + (layerN % 2)*meanR;
+        layerY = 2*wallR + (meanR + sigma);
+        for (i = 0; i < nParticles; i++) {
+            if (sumWidth + 2*particle[i].radius > box_w) {
+                layerY += 2*(meanR + sigma);
+                layerN++;
+                sumWidth = 0 + (layerN % 2)*meanR;
+            }
+            particle[i].x0 = sumWidth + particle[i].radius;
+            particle[i].y0 = layerY;
+            sumWidth += 2*particle[i].radius;
+        }
+        assert(layerY + (meanR + sigma)  < box_h);
 
-    /*Restart RNG for simulation.*/
-    rgen = gsl_rng_alloc(gsl_rng_mt19937);
-    gsl_rng_set(rgen, global.seed);
+        gsl_rng_free(rgen);
 
-    return (nParticles);
-}
+        nParticles += nBottom;
+        nStats = (neighbor_stats*)calloc((nParticles*nParticles-nParticles)/2 ,
+                                         sizeof(neighbor_stats));
+        for (i = 0; i < (nParticles*nParticles-nParticles)/2; i++) {
+            nStats[i].touching = 0;
+        }
 
-void init_system_wedge() {
-    double meanR = diskParameters.meanR;
-    double density = diskParameters.density;
-    long i;
-    double wedgeAngle = M_PI/6;
+        /*Restart RNG for simulation.*/
+        rgen = gsl_rng_alloc(gsl_rng_mt19937);
+        gsl_rng_set(rgen, global.seed);
 
-    global.box_w = 3*2*diskParameters.meanR;
-    global.box_h = 3*2*diskParameters.meanR;
-    particle = (disk*)calloc(3, sizeof(disk));
-
-    /*Setup the walls. Type = 2 for straight walls.*/
-    for (i = 1; i < 3; i++) {
-        particle[i].type = 2;
-        double m = pow(-1, i)*tan(wedgeAngle);
-        double b = -m*global.box_w/2;
-        particle[i].p1x = 0;
-        particle[i].p1y = b;
-        particle[i].p2x = 1;
-        particle[i].p2y = m+b;
-        /*Store initial positions for boundary conditions*/
-        particle[i].p1x0 = particle[i].p1x;
-        particle[i].p1y0 = particle[i].p1y;
-        particle[i].p2x0 = particle[i].p2x;
-        particle[i].p2y0 = particle[i].p2y;
-        /*Set initial displacement of bottom*/
-        particle[i].p1y += global.epsilon*global.relInitDisp;
-        particle[i].p2y += global.epsilon*global.relInitDisp;
+        return (nParticles);
     }
 
-    /*Setup mobile particle. Type = 0 for mobile disk.*/
-    particle[0].type = 0;
-    particle[0].radius = meanR;
-    particle[0].mass = density*particle[0].radius*particle[0].radius*M_PI;
-    particle[0].iMoment =
-        particle[0].mass*particle[0].radius*particle[0].radius/2;
-    particle[0].x0 = global.box_w/2;
-    particle[0].y0 = particle[0].radius*2;
+    void init_system_wedge() {
+        double meanR = diskParameters.meanR;
+        double density = diskParameters.density;
+        long i;
+        double wedgeAngle = M_PI/6;
 
-    nStats = (neighbor_stats*)calloc(3, sizeof(neighbor_stats));
-    for (i = 0; i < 3; i++) {
-        nStats[i].touching = 0;
-    }
+        global.box_w = 3*2*diskParameters.meanR;
+        global.box_h = 3*2*diskParameters.meanR;
+        particle = (disk*)calloc(3, sizeof(disk));
 
-    /*Restart RNG for simulation.*/
-    rgen = gsl_rng_alloc(gsl_rng_mt19937);
-    gsl_rng_set(rgen, global.seed);
-
-    return;
-}
-
-void init_system_file(FILE *input_fptr) {
-    /* Get input from file. */
-    /* First line is nDisks nWalls box_w box_h*/
-    /* File data as
-       p1x p1y nx ny
-       x y R mass iMoment */
-    char input[500];
-    long nDisks, nWalls;
-
-    /* Read nDisks and nWalls. */
-    if (fgets(input, sizeof(input), input_fptr) == NULL) exit(1);
-    sscanf(input,"%ld %ld %lf %lf",
-           &nDisks, &nWalls, &global.box_w, &global.box_h);
-    global.nParticles = nDisks + nWalls;
-    global.box_w *= 1.1; global.box_h *= 1.1;
-
-    /* Allocate memory. */
-    particle = (disk*)calloc(global.nParticles, sizeof(disk));
-
-    /* Setup particles and walls. */
-    for (long i = nDisks; i < global.nParticles; i++) {
-        double p1x, p1y, nx, ny;
-        particle[i].type = 2;
-        /* Wall data: p1x p1y nx ny. */
-        if (fgets(input, sizeof(input), input_fptr) == NULL) exit(1);
-        sscanf(input,"%lf %lf %lf %lf", &p1x, &p1y, &nx, &ny);
-        particle[i].p1x = p1x;
-        particle[i].p1y = p1y;
-        particle[i].p2x = p1x + ny;
-        particle[i].p2y = p1y - nx;
-        /* Store initial positions for boundary conditions */
-        particle[i].p1x0 = particle[i].p1x;
-        particle[i].p1y0 = particle[i].p1y;
-        particle[i].p2x0 = particle[i].p2x;
-        particle[i].p2y0 = particle[i].p2y;
-        /* Set initial displacement of bottom for bottom wall. */
-        if (ny == 1) {
+        /*Setup the walls. Type = 2 for straight walls.*/
+        for (i = 1; i < 3; i++) {
+            particle[i].type = 2;
+            double m = pow(-1, i)*tan(wedgeAngle);
+            double b = -m*global.box_w/2;
+            particle[i].p1x = 0;
+            particle[i].p1y = b;
+            particle[i].p2x = 1;
+            particle[i].p2y = m+b;
+            /*Store initial positions for boundary conditions*/
+            particle[i].p1x0 = particle[i].p1x;
+            particle[i].p1y0 = particle[i].p1y;
+            particle[i].p2x0 = particle[i].p2x;
+            particle[i].p2y0 = particle[i].p2y;
+            /*Set initial displacement of bottom*/
             particle[i].p1y += global.epsilon*global.relInitDisp;
             particle[i].p2y += global.epsilon*global.relInitDisp;
         }
+
+        /*Setup mobile particle. Type = 0 for mobile disk.*/
+        particle[0].type = 0;
+        particle[0].radius = meanR;
+        particle[0].mass = density*particle[0].radius*particle[0].radius*M_PI;
+        particle[0].iMoment =
+            particle[0].mass*particle[0].radius*particle[0].radius/2;
+        particle[0].x0 = global.box_w/2;
+        particle[0].y0 = particle[0].radius*2;
+
+        nStats = (neighbor_stats*)calloc(3, sizeof(neighbor_stats));
+        for (i = 0; i < 3; i++) {
+            nStats[i].touching = 0;
+        }
+
+        /*Restart RNG for simulation.*/
+        rgen = gsl_rng_alloc(gsl_rng_mt19937);
+        gsl_rng_set(rgen, global.seed);
+
+        return;
     }
-    for (long i = 0; i < nDisks; i++) {
-        /* Disk data: x y R mass iMoment */
-        double x, y, R, mass, iMoment;
+
+    void init_system_file(FILE *input_fptr) {
+        /* Get input from file. */
+        /* First line is nDisks nWalls box_w box_h*/
+        /* File data as
+           p1x p1y nx ny
+           x y R mass iMoment */
+        char input[500];
+        long nDisks, nWalls;
+
+        /* Read nDisks and nWalls. */
         if (fgets(input, sizeof(input), input_fptr) == NULL) exit(1);
-        sscanf(input,"%lf %lf %lf %lf %lf", &x, &y, &R, &mass, &iMoment);
-        particle[i].type = 0;
-        particle[i].x0 = x;
-        particle[i].y0 = y;
-        particle[i].radius = R;
-        particle[i].mass = mass;
-        particle[i].iMoment = iMoment;
-    }
+        sscanf(input,"%ld %ld %lf %lf",
+               &nDisks, &nWalls, &global.box_w, &global.box_h);
+        global.nParticles = nDisks + nWalls;
+        global.box_w *= 1.1; global.box_h *= 1.1;
 
-    nStats = (neighbor_stats*)calloc((global.nParticles*global.nParticles
-                                       - global.nParticles)/2 ,
-                                      sizeof(neighbor_stats));
+        /* Allocate memory. */
+        particle = (disk*)calloc(global.nParticles, sizeof(disk));
 
-
-    /*Restart RNG for simulation.*/
-    rgen = gsl_rng_alloc(gsl_rng_mt19937);
-    gsl_rng_set(rgen, global.seed);
-}
-
-void step(long kstep) {
-    long i = 0;
-    long nParticles = global.nParticles;
-
-    global.time += global.timestep;
-
-    global.meanLinkSat = global.meanSqLinkSat = 0;
-    global.linkCount = global.changingLinks = global.slidingLinks = 0;
-    global.potEnergyElasNorm = global.potEnergyElasTg = 0;
-
-    for (i = 0; i < nParticles; i++) {
-        if (particle[i].type == 0) {
-            if (particle[i].posFixed == 0) predictor_positions(&particle[i]);
-            if (particle[i].rotFixed == 0) predictor_rotations(&particle[i]);
+        /* Setup particles and walls. */
+        for (long i = nDisks; i < global.nParticles; i++) {
+            double p1x, p1y, nx, ny;
+            particle[i].type = 2;
+            /* Wall data: p1x p1y nx ny. */
+            if (fgets(input, sizeof(input), input_fptr) == NULL) exit(1);
+            sscanf(input,"%lf %lf %lf %lf", &p1x, &p1y, &nx, &ny);
+            particle[i].p1x = p1x;
+            particle[i].p1y = p1y;
+            particle[i].p2x = p1x + ny;
+            particle[i].p2y = p1y - nx;
+            /* Store initial positions for boundary conditions */
+            particle[i].p1x0 = particle[i].p1x;
+            particle[i].p1y0 = particle[i].p1y;
+            particle[i].p2x0 = particle[i].p2x;
+            particle[i].p2y0 = particle[i].p2y;
+            /* Set initial displacement of bottom for bottom wall. */
+            if (ny == 1) {
+                particle[i].p1y += global.epsilon*global.relInitDisp;
+                particle[i].p2y += global.epsilon*global.relInitDisp;
+            }
         }
-        if (particle[i].type == 1) boundary_conditions(&particle[i],
-                                                       global.bCondType, kstep);
-        if (particle[i].type == 2) boundary_conditions_walls(i);
-    }
-    make_forces();
-    for (i = 0; i < nParticles; i++) {
-        if (particle[i].type == 0) {
-            if (particle[i].posFixed == 0) corrector_positions(&particle[i]);
-            if (particle[i].rotFixed == 0) corrector_rotations(&particle[i]);
+        for (long i = 0; i < nDisks; i++) {
+            /* Disk data: x y R mass iMoment */
+            double x, y, R, mass, iMoment;
+            if (fgets(input, sizeof(input), input_fptr) == NULL) exit(1);
+            sscanf(input,"%lf %lf %lf %lf %lf", &x, &y, &R, &mass, &iMoment);
+            particle[i].type = 0;
+            particle[i].x0 = x;
+            particle[i].y0 = y;
+            particle[i].radius = R;
+            particle[i].mass = mass;
+            particle[i].iMoment = iMoment;
         }
-        //Implement periodic boundary conditions if necessary (High vel drifts).
+
+        nStats = (neighbor_stats*)calloc((global.nParticles*global.nParticles
+                                          - global.nParticles)/2 ,
+                                         sizeof(neighbor_stats));
+
+
+        /*Restart RNG for simulation.*/
+        rgen = gsl_rng_alloc(gsl_rng_mt19937);
+        gsl_rng_set(rgen, global.seed);
     }
 
-    /*Link statistics for the 3disk setup*/
-    if (global.nParticles == 3) {
-        links3.lstkount++;
+    void step(long kstep) {
+        long i = 0;
+        long nParticles = global.nParticles;
 
-        links3.op_op += (1 - nStats[0].touching)*(1 - nStats[1].touching);
-        links3.op_sl += (1 - nStats[0].touching)*(nStats[1].sliding);
-        links3.op_cl += (1 - nStats[0].touching)*(nStats[1].touching)
-            *(1 - nStats[1].sliding);
+        global.time += global.timestep;
 
-        links3.sl_op += (nStats[0].sliding)*(1 - nStats[1].touching);
-        links3.sl_sl += (nStats[0].sliding)*(nStats[1].sliding);
-        links3.sl_cl += (nStats[0].sliding)*(nStats[1].touching)
-            *(1 - nStats[1].sliding);
+        global.meanLinkSat = global.meanSqLinkSat = 0;
+        global.linkCount = global.changingLinks = global.slidingLinks = 0;
+        global.potEnergyElasNorm = global.potEnergyElasTg = 0;
 
-        links3.cl_op += (1 - nStats[0].sliding)*(nStats[0].touching)
-            *(1 - nStats[1].touching);
-        links3.cl_sl += (1 - nStats[0].sliding)*(nStats[0].touching)
-            *(nStats[1].sliding);
-        links3.cl_cl += (1 - nStats[0].sliding)
-            *(nStats[0].touching*nStats[1].touching)*(1 - nStats[1].sliding);
+        for (i = 0; i < nParticles; i++) {
+            if (particle[i].type == 0) {
+                if (particle[i].posFixed == 0) predictor_positions(&particle[i]);
+                if (particle[i].rotFixed == 0) predictor_rotations(&particle[i]);
+            }
+            if (particle[i].type == 1) boundary_conditions(&particle[i],
+                                                           global.bCondType, kstep);
+            if (particle[i].type == 2) boundary_conditions_walls(i);
+        }
+        make_forces();
+        for (i = 0; i < nParticles; i++) {
+            if (particle[i].type == 0) {
+                if (particle[i].posFixed == 0) corrector_positions(&particle[i]);
+                if (particle[i].rotFixed == 0) corrector_rotations(&particle[i]);
+            }
+            //Implement periodic boundary conditions if necessary (High vel drifts).
+        }
+
+        /*Link statistics for the 3disk setup*/
+        if (global.nParticles == 3) {
+            links3.lstkount++;
+
+            links3.op_op += (1 - nStats[0].touching)*(1 - nStats[1].touching);
+            links3.op_sl += (1 - nStats[0].touching)*(nStats[1].sliding);
+            links3.op_cl += (1 - nStats[0].touching)*(nStats[1].touching)
+                *(1 - nStats[1].sliding);
+
+            links3.sl_op += (nStats[0].sliding)*(1 - nStats[1].touching);
+            links3.sl_sl += (nStats[0].sliding)*(nStats[1].sliding);
+            links3.sl_cl += (nStats[0].sliding)*(nStats[1].touching)
+                *(1 - nStats[1].sliding);
+
+            links3.cl_op += (1 - nStats[0].sliding)*(nStats[0].touching)
+                *(1 - nStats[1].touching);
+            links3.cl_sl += (1 - nStats[0].sliding)*(nStats[0].touching)
+                *(nStats[1].sliding);
+            links3.cl_cl += (1 - nStats[0].sliding)
+                *(nStats[0].touching*nStats[1].touching)*(1 - nStats[1].sliding);
+        }
+
+        return;
     }
 
-    return;
-}
+    void clock_time(int iTime) {
+        int days, hours, minutes, seconds;
+        int tTime = (int)time(NULL) - iTime;
+        int t;
 
-void clock_time(int iTime) {
-    int days, hours, minutes, seconds;
-    int tTime = (int)time(NULL) - iTime;
-    int t;
+        days = tTime/(86400);
+        t = tTime%(86400);
+        hours = t/3600;
+        t = t%3600;
+        minutes = t/60;
+        t = t%60;
+        seconds = t;
 
-    days = tTime/(86400);
-    t = tTime%(86400);
-    hours = t/3600;
-    t = t%3600;
-    minutes = t/60;
-    t = t%60;
-    seconds = t;
-
-    printf("CPU time = %f seconds.\n", (double)clock()/CLOCKS_PER_SEC);
-    printf("Wall time = %d days, %d hours, %d minutes, %d seconds.\n", days,
-           hours, minutes, seconds);
-    return;
-}
+        printf("CPU time = %f seconds.\n", (double)clock()/CLOCKS_PER_SEC);
+        printf("Wall time = %d days, %d hours, %d minutes, %d seconds.\n", days,
+               hours, minutes, seconds);
+        return;
+    }
