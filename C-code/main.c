@@ -102,7 +102,7 @@ void get_input() {
             printf("Normal elastic constant = %g. \n", diskParameters.kn);
         } else if (strcmp(type,"#pr") == 0) {
             sscanf(value, "%lf", &diskParameters.pr);
-            printf("Disk's Poisson's ratio = %g. \n", diskParameters.pr);
+            printf("Elastic constants ratio = %g. \n", diskParameters.pr);
         } else if (strcmp(type,"#mu") == 0) {
             sscanf(value, "%lf", &diskParameters.mu);
             printf("Disk's friction coefficient = %g. \n", diskParameters.mu);
@@ -131,8 +131,7 @@ void get_input() {
     assert(countInputs == inputs);
     fclose(fp);
 
-    diskParameters.kt = (1 - diskParameters.pr)/(1 - 0.5*diskParameters.pr)*
-        diskParameters.kn;
+    diskParameters.kt = diskParameters.pr*diskParameters.kn;
     global.box_w *= 2*diskParameters.meanR;
     global.box_h *= 2*diskParameters.meanR;
     global.gravityAngle *= M_PI;
