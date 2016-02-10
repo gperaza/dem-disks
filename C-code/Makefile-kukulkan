@@ -10,7 +10,7 @@ LIBS = ~/lib/libm.a ~/lib/libgsl.a ~/lib/libgslcblas.a
 CC = gcc
 
 HDRS = common.h particle_structures.h
-OBJS = main.o integrator.o forces.o write.o
+OBJS = main.o integrator.o forces.o write.o front.o
 
 default:$(OBJS)
 	$(CC)  $(CFLAGS) $(OBJS) $(GRAPHLIBS) $(LIBS) -o ../disks
@@ -23,3 +23,4 @@ main.o:		Makefile-kukulkan $(HDRS)
 integrator.o:	Makefile-kukulkan $(HDRS)
 forces.o:	Makefile-kukulkan $(HDRS)
 write.o:	Makefile-kukulkan $(HDRS)
+front.o:	Makefile-kukulkan $(HDRS)

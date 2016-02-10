@@ -190,8 +190,8 @@ void draw_data(cairo_t *cr, double box_w, double box_h, double time) {
 
     //Write parameters
     cairo_move_to(cr, 0, -(1-SHRINK)/8*box_h/SHRINK);
-    sprintf(line, "Parámetros: Tiempo = %f", time);
-    cairo_show_text(cr, line);
+    sprintf(line, "Parámetros: Tiempo = %lf", time);
+    //cairo_show_text(cr, line);
     cairo_new_path(cr);
 
     return;

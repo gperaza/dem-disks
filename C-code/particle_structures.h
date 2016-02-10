@@ -21,7 +21,10 @@ typedef struct disk
     double p1x0, p1y0, p2x0, p2y0;
     /* Since lines do not rotate, it is useful to store their normal
        and tangential versors. */
-    double normX, normY, tangX, tangY;
+    double nx, ny;
+    /* Linked list next element. Used for packing.*/
+    struct disk *next;
+    struct disk *prev;
 } disk;
 
 typedef struct particleParameters

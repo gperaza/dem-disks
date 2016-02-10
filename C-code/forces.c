@@ -141,7 +141,7 @@ double normal_force_disk_disk(long i, long j, double r12,
                               double rx12n, double ry12n, double radsum) {
     double kn = diskParameters.kn;
     double vGamma = diskParameters.vGamma;
-    double effMass;
+    /* double effMass; */
 
     double normalForce = 0;
 
@@ -149,22 +149,22 @@ double normal_force_disk_disk(long i, long j, double r12,
     double vx12 = particle[i].x1 - particle[j].x1;
     double vy12 = particle[i].y1 - particle[j].y1;
 
-    if (particle[i].type == particle[j].type){
-        effMass = particle[i].mass*particle[j].mass/(particle[i].mass
-                                                     + particle[j].mass);
-    } else if (particle[i].type != 0) {
-        effMass = particle[j].mass;
-    } else {
-        effMass = particle[i].mass;
-    }
+    /* if (particle[i].type == particle[j].type){ */
+    /*     effMass = particle[i].mass*particle[j].mass/(particle[i].mass */
+    /*                                                  + particle[j].mass); */
+    /* } else if (particle[i].type != 0) { */
+    /*     effMass = particle[j].mass; */
+    /* } else { */
+    /*     effMass = particle[i].mass; */
+    /* } */
 
     normalForce = kn*(radsum - r12);
     normalForce -= vGamma*(rx12n*vx12 + ry12n*vy12); //*2*sqrt(effMass*kn);
-        normalForce = fmax(0, normalForce);
+    normalForce = fmax(0, normalForce);
 
-        global.potEnergyElasNorm += 0.5*kn*(radsum - r12)*(radsum - r12);
+    global.potEnergyElasNorm += 0.5*kn*(radsum - r12)*(radsum - r12);
 
-        return normalForce;
+    return normalForce;
 }
 
 double tangential_force_disk_disk(double normalForce, long i,
