@@ -486,7 +486,6 @@ void init_system() {
 
     /* Setup a dense packing using an advancing front algorithm. */
     pack_disks();
-    exit(0);
 }
 
 void init_system_wedge() {
