@@ -225,7 +225,7 @@ int main(/*int argc, char *argv[]*/) {
         }
 #endif
         step(i);
-        global.bGamma = (nStepsRelax-1-i)/(nStepsRelax-1)*1000;
+        //global.bGamma = (nStepsRelax-1-i)/(nStepsRelax-1)*1000;
     }
     printf("\rRelaxing 100%%\n");
     /*Tilt system and turn on vibration. Thermalization.
