@@ -25,6 +25,10 @@ typedef struct disk
     /* Linked list next element. Used for packing.*/
     struct disk *next;
     struct disk *prev;
+
+    /* Statistics*/
+    double meanX, meanY;
+    double meanSX, meanSY;
 } disk;
 
 typedef struct particleParameters
@@ -60,7 +64,12 @@ typedef struct systemParameters
     unsigned long linkCount, slidingLinks, changingLinks;
     double meanLinkSat, meanSqLinkSat;
 
-    double potEnergyElasNorm, potEnergyElasTg;
+    double potEnergyElasNorm, potEnergyElasTg, potEnergyG;
+    double kinEnergyTrans, kinEnergyRot;
+
+    /* Statistics */
+    double meanX, meanY, meanSX, meanSY;
+    double powerBottom, powerVisc, powerMu, powerSpring;
 } systemParameters;
 
 typedef struct neighbor_stats

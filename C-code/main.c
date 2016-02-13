@@ -18,6 +18,7 @@ FILE *fPhase, *fFirst, *fLast, *fLinkStat, *fLinks, *fEnergy;
 FILE *fp;
 FILE *fCollisions;
 FILE *fPhase2;
+FILE *fStatsDisks, *fStatsPacking;
 
 gsl_rng * rgen;
 
@@ -32,6 +33,7 @@ void init_system();
 void init_system_wedge();
 void init_system_file(FILE*);
 void pack_disks();
+void write_stats();
 
 void get_input() {
     char input[200];
@@ -160,11 +162,11 @@ int main(/*int argc, char *argv[]*/) {
 
     /* Automatically adjust timestep to be one hundredth of the
        normal period of a disk oscillation. */
-
     global.timestep = 0.01*2*M_PI/
         sqrt(diskParameters.kn/(diskParameters.density*M_PI*
                                 diskParameters.meanR*diskParameters.meanR));
     printf("Adjusted timestep = %g\n", global.timestep);
+
     double timestep = global.timestep;
     long nStepsRelax = (long)(global.relaxTime/timestep);
     long nStepsThermal = (long)(global.thermalTime/timestep);
@@ -187,6 +189,8 @@ int main(/*int argc, char *argv[]*/) {
     fLinkStat = fopen("3disk_linkstat.out", "w");
     fLinks = fopen("links.out", "w");
     fEnergy = fopen("elastic_energy.out", "w");
+    fStatsDisks = fopen("disk_stats.out", "w");
+    fStatsPacking = fopen("packing_stats.out", "w");
 #ifdef COLLISIONS
     fCollisions = fopen("collisions.out", "w");
 #endif
@@ -199,7 +203,7 @@ int main(/*int argc, char *argv[]*/) {
         global.nParticles = 3;
         init_system_wedge();
         printf("Simulating a wedge.\n");
-    } else if ((input_fptr = fopen("input_phase_space.out", "r")) != NULL){
+    } else if ((input_fptr = fopen("input_phase_space.out", "r")) != NULL) {
         init_system_file(input_fptr);
         fclose(input_fptr);
     } else {
@@ -256,7 +260,19 @@ int main(/*int argc, char *argv[]*/) {
             particle[i].xi = particle[i].x0;
             particle[i].yi = particle[i].y0;
         }
+        particle[i].meanX = 0;
+        particle[i].meanY = 0;
+        particle[i].meanSX = 0;
+        particle[i].meanSY = 0;
     }
+    global.powerBottom = 0;
+    global.powerVisc = 0;
+    global.powerMu = 0;
+    global.powerSpring = 0;
+    global.potEnergyElasNorm = global.potEnergyElasTg = 0;
+    global.potEnergyG = 0;
+    global.kinEnergyTrans = global.kinEnergyRot =0;
+
     //Restart 3disk statistics to forget relaxation.
     links3.op_op = links3.op_sl = links3.op_cl = links3.sl_op = links3.sl_sl =
         links3.sl_cl = links3.cl_op = links3.cl_sl = links3.cl_cl = 0;
@@ -283,6 +299,7 @@ int main(/*int argc, char *argv[]*/) {
 
         if (!(i % stepsForWriteRun)) {
             write_results();
+            if (i > 0) write_stats(stepsForWriteRun);
         }
         step(i);
     }
@@ -610,7 +627,6 @@ void step(long kstep) {
 
     global.meanLinkSat = global.meanSqLinkSat = 0;
     global.linkCount = global.changingLinks = global.slidingLinks = 0;
-    global.potEnergyElasNorm = global.potEnergyElasTg = 0;
 
     for (i = 0; i < nParticles; i++) {
         if (particle[i].type == 0) {
@@ -650,6 +666,14 @@ void step(long kstep) {
             *(nStats[1].sliding);
         links3.cl_cl += (1 - nStats[0].sliding)
             *(nStats[0].touching*nStats[1].touching)*(1 - nStats[1].sliding);
+    }
+
+    /* Statistics */
+    for (long i = 0; i < nParticles; i++) {
+        particle[i].meanX += particle[i].x0;
+        particle[i].meanY += particle[i].y0;
+        particle[i].meanSX += particle[i].x0*particle[i].x0;
+        particle[i].meanSY += particle[i].y0*particle[i].y0;
     }
 
     return;

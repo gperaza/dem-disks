@@ -6,6 +6,8 @@ extern links_3disks links3;
 extern FILE *fCollisions;
 extern gsl_rng * rgen;
 extern FILE *fPhase2;
+extern FILE *fStatsDisks;
+extern FILE *fStatsPacking;
 
 void phase_plot(FILE*);
 void phase_plot2(FILE*);
@@ -15,6 +17,7 @@ void search_collisions();
 void write_collision(long, int, unsigned long);
 void save_collision_data(long, int);
 void collision_stats(long, int);
+void write_stats(long);
 
 void write_results() {
 
@@ -33,9 +36,6 @@ void write_results() {
             global.meanLinkSat,
             global.meanSqLinkSat
             );
-
-    fprintf(fEnergy, "%e %e %e\n",
-            global.time, global.potEnergyElasNorm, global.potEnergyElasTg);
 
     /*Calculate and write data for the 3Disk setup.*/
     /*0-time
@@ -57,7 +57,6 @@ void write_results() {
     }
 
     fflush(fLinks);
-    fflush(fEnergy);
     fflush(fLinkStat);
 
     return;
@@ -361,4 +360,61 @@ void write_collision_stats() {
             mVyRf/pR,
             notCollisionN);
     fclose(fp);
+}
+
+void write_stats(long steps) {
+    double meanXAll = 0, meanYAll = 0;
+    double meanSDXAll = 0, meanSDYAll = 0;
+    long nDisks = 0;
+
+    fprintf(fStatsDisks, "%e", global.time);
+    for (long i = 0; i < global.nParticles; i++){
+        double meanX = particle[i].meanX/steps;
+        double meanY = particle[i].meanY/steps;
+        double meanSX = particle[i].meanSX/steps;
+        double meanSY = particle[i].meanSY/steps;
+        double meanSDX = meanSX - meanX*meanX;
+        double meanSDY = meanSY - meanY*meanY;
+
+        fprintf(fStatsDisks, " %18.12e %18.12e %18.12e %18.12e",
+                meanX, meanY, meanSDX, meanSDY);
+
+        particle[i].meanX = 0;
+        particle[i].meanY = 0;
+        particle[i].meanSX = 0;
+        particle[i].meanSY = 0;
+
+        if (particle[i].type == 0){
+            meanXAll += meanX;
+            meanYAll += meanY;
+            meanSDXAll += meanSDX;
+            meanSDYAll += meanSDY;
+            nDisks += 1;
+        }
+    }
+    fprintf(fStatsDisks, "\n");
+    meanXAll /= nDisks;
+    meanYAll /= nDisks;
+    meanSDXAll /= nDisks;
+    meanSDYAll /= nDisks;
+    fprintf(fStatsPacking, "%e %18.12e %18.12e %18.12e %18.12e "
+            "%18.12e %18.12e %18.12e %18.12e\n",
+            global.time, meanXAll, meanYAll, meanSDXAll, meanSDYAll,
+            global.powerBottom/steps, global.powerVisc/steps,
+            global.powerMu/steps, global.powerSpring/steps);
+
+    global.powerBottom = 0;
+    global.powerVisc = 0;
+    global.powerMu = 0;
+    global.powerSpring = 0;
+
+    fprintf(fEnergy, "%e %18.12e %18.12e %18.12e %18.12e %18.12e\n",
+            global.time,
+            global.potEnergyElasNorm/steps, global.potEnergyElasTg/steps,
+            global.potEnergyG/steps, global.kinEnergyTrans/steps,
+            global.kinEnergyRot/steps);
+
+    global.potEnergyElasNorm = global.potEnergyElasTg = 0;
+    global.potEnergyG = global.kinEnergyTrans = 0;
+    global.kinEnergyRot = 0;
 }

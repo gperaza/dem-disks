@@ -174,6 +174,7 @@ void boundary_conditions(disk *particle, int b_cond, long kstep) {
 }
 
 void boundary_conditions_walls(long i) {
+    if (i != global.nParticles - 4) return;
     double freq = global.freq;
     double time = global.time;
     double phase = global.phase;
